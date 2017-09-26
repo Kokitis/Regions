@@ -13,9 +13,19 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+*.exe
 
 # Windows shortcuts
 *.lnk
+
+# Compiled Python Files
+*.pyc
+
+# Pycharm folder
+.idea/
+
+# Large database Files
+*.sqlite
 
 # =========================
 # Operating System Files
