@@ -78,7 +78,7 @@ class CompositeRegion(EmulatorRegion):
 		return list(self._loaded_series.values())
 
 	def _loadSeries(self, key):
-		_series = CompositeSeries([i.getSeries(key) for i in self.subRegions])
+		_series = CompositeSeries([i.getSeries(key) for i in self.subRegions], region = self)
 		return _series
 
 	def getSeries(self, key):
@@ -130,6 +130,7 @@ class CompositeSeries(EmulatorSeries):
 		template = kwargs.get('template', series_list[0])
 
 		arguments = self._parseCompositeArguments(template, **kwargs)
+		arguments['region'] = kwargs.get('region')
 
 		self._original, self._values = self._combineSeries(series_list, method)
 

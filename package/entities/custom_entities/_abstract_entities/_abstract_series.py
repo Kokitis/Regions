@@ -324,9 +324,9 @@ class AbstractSeries:
 			else:
 				message = "Invalid operation: '{}' ({})".format(kind, ", ".join({'doublingTime', 'doublingYear', 'yearlyGrowth', 'yearlyChange'}))
 				raise ValueError(message)
-			
-			newseries.append((year, value))
-		newseries = self.emulate(newseries, self)
+			if not math.isnan(value):
+				newseries.append((year, value))
+		newseries = self.emulate(self, newseries)
 		return newseries
 
 	@staticmethod

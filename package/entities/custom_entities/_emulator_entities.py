@@ -19,6 +19,7 @@ class EmulatorRegion(AbstractRegion):
 			Keyword Arguments
 			-----------------
 				Any valid argument that can be used to create a Region entity.
+
 		"""
 		arguments = self._parseInputArguments(template, **kwargs)
 		self._series 		= arguments['series']
@@ -101,7 +102,6 @@ class EmulatorSeries(AbstractSeries):
 				* 'notes'
 				* 'units'
 				* 'scale'
-				* 'commonCode'
 				* 'name'
 				* 'code'
 		"""
