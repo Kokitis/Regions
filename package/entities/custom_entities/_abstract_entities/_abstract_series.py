@@ -143,22 +143,26 @@ class AbstractSeries:
 					x[-1] for calls to x's greater than max(x)
 				* 'extrapolate': Values outside the x range are extrapolated.
 		"""
-		
-		if bounds == 'bounds':
-			bounds = (self.y[0], self.y[-1])
-		elif bounds == 'zero':
-			bounds = (0, 0)
-		elif bounds == 'extrapolate':
-			bounds = 'extrapolate'
-		elif bounds == 'nan' or bounds is None:
-			bounds = (math.nan, math.nan)
+		if len(self.x) > 1:
+			if bounds == 'bounds':
+				bounds = (self.y[0], self.y[-1])
+			elif bounds == 'zero':
+				bounds = (0, 0)
+			elif bounds == 'extrapolate':
+				bounds = 'extrapolate'
+			elif bounds == 'nan' or bounds is None:
+				bounds = (math.nan, math.nan)
 
-		_interpolation = interp1d(
-			self.x, 
-			self.y,
-			bounds_error = False,
-			fill_value = bounds
-		)
+			_interpolation = interp1d(
+				self.x, 
+				self.y,
+				bounds_error = False,
+				fill_value = bounds
+			)
+		elif len(self.x) == 1:
+			_interpolation = lambda s: self.y[0]
+		else:
+			_interpolation = lambda s: math.nan
 		self._interpolate = _interpolation
 
 	@classmethod

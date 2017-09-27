@@ -27,6 +27,12 @@ $RECYCLE.BIN/
 # Large database Files
 *.sqlite
 
+# Other
+*.pyperf
+*.sln
+*.pyproj
+*.suo
+
 # =========================
 # Operating System Files
 # =========================

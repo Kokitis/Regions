@@ -11,12 +11,13 @@ from .. import entities
 from ..data import getDefinition
 from ..utilities import namespaces, validation
 
-DATA_FOLDER = "C:\\Users\\Deitrickc\\Documents\\GitHub\\RegionDB\\data\\databases\\"
+database_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "databases")
 
 standard_datasets = {
-	'global': os.path.join(DATA_FOLDER, "global_database.sqlite"),
-	'europe': os.path.join(DATA_FOLDER, "eurostat_database.sqlite")
+	'global': os.path.join(database_folder, "global_database.sqlite"),
+	'europe': os.path.join(database_folder, "eurostat_database.sqlite")
 }
+
 
 class RegionDatabase:
 	""" Accesses a database with information concerning various regions.
@@ -161,20 +162,17 @@ class RegionDatabase:
 		"""
 		if not isinstance(keys, (list,tuple,set)):
 			keys = [keys]
-		keys = [i for i in keys if isinstance(i, str)]
-		#print(keys)
-		if namespace is None:
-			candidates = self.Identifier.select(lambda s: s)
-		else:
-			namespace = self.access('get', 'namespace', namespace)
-			if namespace is None:
-				raise ValueError
-			candidates = self.Identifier.select(lambda s: s.namespace == namespace)
+		keys = (i for i in keys if isinstance(i, str))
 
-		candidates = [i for i in candidates if i.string in keys]
+		candidates = self.Identifier.select(lambda s: s.string in keys)
+
+		if namespace is not None:
+			namespace = self.access('get', 'namespace', namespace)
+			candidates = candidates.filter(lambda s: s.namespace == namespace)
+		#candidates = [i for i in candidates if i.string in keys]
 		
-		if len(candidates) == 0:
-			candidates = list(self.Region.select(lambda s: s.name in keys))
+		#if len(candidates) == 0:
+		#	candidates = list(self.Region.select(lambda s: s.name in keys))
 		
 		
 		if len(candidates) > 1:
@@ -189,9 +187,23 @@ class RegionDatabase:
 		elif len(candidates) == 0:
 			result = None
 		else:
-			result = candidates[0]
+			result = candidates.first().region
 		
 		return result
+	@pony.orm.db_session
+	def getRegions(self, keys, namespace = None, return_type = 'regions'):
+		""" Searches for a number of series. """
+
+		candidates = self.Identifier.select(lambda s: s.string in keys)
+		if namespace is not None:
+			namespace = self.access('get', 'namespace', namespace)
+			candidates = candidates.filter(lambda s: s.namespace == namespace)
+
+		if return_type == 'regions':
+			candidates = [i.region for i in candidates]
+		else:
+			candidates = list(candidates)
+		return candidates
 	def insertEntity(self, entity_type, **kwargs):
 		return self.access('insert', entity_type, **kwargs)
 
@@ -312,7 +324,7 @@ class RegionDatabase:
 
 		return result
 
-	def describe(self, section = 'all'):
+	def show(self, section = 'all'):
 		"""
 			Parameters
 			----------
@@ -495,6 +507,7 @@ class RegionDatabase:
 
 		skipped_region_codes = set()
 		skipped = list()
+		print("Importing the converted series into the database...")
 		pbar = progressbar.ProgressBar(max_value = len(data['series']))
 		for index, row in enumerate(data['series']):
 			pbar.update(index)

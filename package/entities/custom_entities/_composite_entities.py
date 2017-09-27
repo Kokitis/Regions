@@ -1,13 +1,15 @@
 from ._emulator_entities import EmulatorRegion, EmulatorSeries
 from ...github import numbertools
-
+import pony
 
 class CompositeRegion(EmulatorRegion):
 	""" A region composed of a number of smaller regions.
 		Parameters
 		----------
-		regions: list<Region>
+		regions: list<Region>, list<Identifier>
 			A list of the subregions. 
+		report: str
+			Composite regions will only encapsulate data from a single report.
 		interpolate: {'linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'}; default 'linear'}
 			Specifies the kind of interpolation as a string 
 
@@ -16,30 +18,46 @@ class CompositeRegion(EmulatorRegion):
 		name: str [Required]
 			The name of the composite region
 		
+		Notes
+		-----
+			Composite Regions are only generated when requested.
+		
 			
 	"""
-	def __init__(self, regions, **kwargs):
+	@pony.orm.db_session
+	def __init__(self, regions, report, **kwargs):
+		if report is None:
+			message = "Must supply a valid report to load!"
+			raise ValueError(message)
 
-		_series = self._parseSeries(regions)
-
+		#_series = self._parseSeries(regions, report)
+		self._loaded_series = dict()
 		configuration = {
 			'name': kwargs['name'],
 			'subRegions': regions,
 			'regionType': 'union',
 			'parentRegion': None,
-			'series': _series
+			'series': []
 		}
+
+
 		super().__init__(None, **configuration)
 
 	def __str__(self):
 		string = "CompositeRegion({})".format(self.name)
 		return string
 
-	@staticmethod
-	def _parseSeries(regions):
+	@pony.orm.db_session
+	def _parseSeries(self, regions, report):
 		_series = dict()
-		for region in regions:
-			for series in region.series:
+		for element in regions:
+			if element.entity_type == 'identifier':
+				region = element.region
+			else:
+				region = element
+			print(report,'\t',region)
+			for series in region.series.select(lambda s: s.report.name == report or s.report.code == report):
+				print("ABC")
 				key = "{}|{}".format(str(series.report), series.code)
 				if key not in _series:
 					_series[key] = list()
@@ -57,7 +75,11 @@ class CompositeRegion(EmulatorRegion):
 
 	@property
 	def series(self):
-		return list(self._series.values())
+		return list(self._loaded_series.values())
+
+	def _loadSeries(self, key):
+		_series = CompositeSeries([i.getSeries(key) for i in self.subRegions])
+		return _series
 
 	def getSeries(self, key):
 		""" Retrieves a series for the Composite Series
@@ -70,11 +92,9 @@ class CompositeRegion(EmulatorRegion):
 			-------
 				series: CompositeSeries
 		"""
-
-		for element, s in self._series.items():
-			_, c = element.split('|')
-			if c == key:
-				return s
+		if key not in self._series:
+			self._loaded_series[key] = self._loadSeries(key)
+		return self._loaded_series[key]
 
 
 class CompositeSeries(EmulatorSeries):

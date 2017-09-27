@@ -42,6 +42,7 @@ def addWorldDevelopmentIndicators(dataset, filename = None):
         filename: str; default None
             Path to a newly-downloaded version of the table. 
     """
+    print("Preparing to import the World Development Indicators...")
     if filename is None:
         filename = getDefinition('file', 'World Development Indicators')
 
@@ -164,5 +165,40 @@ def addWorldDevelopmentIndicators(dataset, filename = None):
 def defaultMadisonHistoricalTables(dataset):
     pass
 
-def defaultUnPopulationProspects(dataset):
-    pass
+def defaultUnPopulationProspects(dataset, version = '2017'):
+
+    filename = None 
+
+    odict_keys(['ESTIMATES', 'MEDIUM VARIANT', 'HIGH VARIANT', 'LOW VARIANT', 'CONSTANT-FERTILITY', 'INSTANT-REPLACEMENT', 'MOMENTUM', 'ZERO-MIGRATION', 'CONSTANT-MORTALITY', 'NO CHANGE', 'NOTES'])
+
+    # For reference
+
+    subject_keymap = {
+        'ESTIMATES':        'POP.EST',
+        'MEDIUM VARIANT':   'POP.PROJ.MID',
+        'HIGH VARIANT':     'POP.PROJ.MAX',
+        'LOW VARIANT':      'POP.PROJ.LOW',
+        'CONSTANT-FERTILITY': 'POP.PROJ.CONST',
+        'ZERO-MIGRATION':   'POP.PROJ.ZERO',
+        'NO CHANGE':        'POP.PROJ.STATIC'
+    } 
+
+    table_dict = pandas.read_excel(filename, sheetname = None, skiprows = 15) #Creates a dict of dataframes.
+
+    for subject_name, sheet in table_dict.items():
+        subject_code = subject_keymap[subject_name]
+
+        table['subjectCode'] = [subject_code for i in len(table)]
+        table['subjectName'] = [subject_name for i in len(table)]
+
+    
+    full_table = pandas.concat(table_dict.values())
+
+    subject_description_map = {
+
+    }
+
+    configuration = {
+        
+    }
+

@@ -1,6 +1,11 @@
-from . import validation, tables
-from ..github import tabletools
 from pprint import pprint
+
+import progressbar
+
+from . import tables, validation
+from ..github import tabletools
+
+
 class ConvertTable:
 	""" Designed to parse a spreadsheet and import it into the database.
 		Parameters
@@ -35,6 +40,7 @@ class ConvertTable:
 			* 'regionNameColumn'
 	"""
 	def __init__(self, dataset, filename, namespace, report, **kwargs):
+		print("Converting ", filename)
 		self.dataset = dataset
 		assert isinstance(namespace, str)
 		assert isinstance(report, dict)
@@ -69,12 +75,15 @@ class ConvertTable:
 
 		# Get the relevant columns for the data.
 		column_categories = self.parseTableColumns(table.columns, **kwargs)
-		print("Column Categories:")
-		for k, v in column_categories.items():
-			print("\t{}\t{}".format(k, v))
+		#print("Column Categories:")
+		#for k, v in column_categories.items():
+		#	print("\t{}\t{}".format(k, v))
 
 		json_table = list()
-		for row in table:
+		pbar = progressbar.ProgressBar(max_value = len(table))
+		print("Converting the table into a compatible json format...")
+		for index, row in enumerate(table):
+			pbar.update(index)
 			parsed_row = self.convertRow(row, column_categories, **kwargs)
 			if parsed_row:
 				json_table.append(parsed_row)
@@ -175,8 +184,6 @@ class ConvertTable:
 			assert region_code_column
 			assert region_name_column
 		except AssertionError as exception:
-			pass 
-		if True:
 			print("Columns: ")
 			for col in columns:
 				print("\t", col)
@@ -193,7 +200,7 @@ class ConvertTable:
 			print("Series Note Column: ", series_note_column)
 			print("Series Scale Column:", series_scale_column)
 			print("Series Description Column: ", series_description_column)
-			#raise exception
+			raise exception
 		
 		return result
 
