@@ -1,15 +1,26 @@
 """ Contains default configurations for common tables used in the database such as
     the World Economic Outlook and Word Development Indicators
 """
+import pandas
+import math 
 from functools import partial
 from pony.orm import db_session
 
-from ..data import getDefinition
-from ..github import tabletools
-from ._converters import ConvertTable
+from ...data import getDefinition
+from ...github import tabletools
+from .._converters import ConvertTable
+from ._world_population_prospects import addWorldPopulationProspects
+def addReport(dataset, string, *args):
+    """ Adds the selected report to the dataset. """
 
-@db_session
-def addWorldEconomicOutlook(dataset):
+    if string in {'WEO', 'World Economic Outlook'}:
+        result = addWorldEconomicOutlook(dataset) 
+    elif string in {'WDI', 'World Development Indicators'}:
+        result = addWorldDevelopmentIndicators(dataset) 
+    elif string.startswith('WPP'):
+        result = addWorldPopulationProspects(dataset, *args)
+    return result
+def _addWorldEconomicOutlook(dataset):
     """
     """
     filename =  getDefinition('file', 'World Economic Outlook')
@@ -34,7 +45,7 @@ def addWorldEconomicOutlook(dataset):
     namespace = 'ISO'
     ConvertTable(dataset, filename, namespace, report, blacklist = blacklist, seriesTagMap = tag_map)
 
-def addWorldDevelopmentIndicators(dataset, filename = None):
+def _addWorldDevelopmentIndicators(dataset, filename = None):
     """ Parameters
         ----------
         dataset: ImportDatabase
@@ -162,43 +173,6 @@ def addWorldDevelopmentIndicators(dataset, filename = None):
     ConvertTable(dataset, data_sheet, namespace = 'ISO', report = report, **configuration)
 
 
-def defaultMadisonHistoricalTables(dataset):
+def _defaultMadisonHistoricalTables(dataset):
     pass
-
-def defaultUnPopulationProspects(dataset, version = '2017'):
-
-    filename = None 
-
-    odict_keys(['ESTIMATES', 'MEDIUM VARIANT', 'HIGH VARIANT', 'LOW VARIANT', 'CONSTANT-FERTILITY', 'INSTANT-REPLACEMENT', 'MOMENTUM', 'ZERO-MIGRATION', 'CONSTANT-MORTALITY', 'NO CHANGE', 'NOTES'])
-
-    # For reference
-
-    subject_keymap = {
-        'ESTIMATES':        'POP.EST',
-        'MEDIUM VARIANT':   'POP.PROJ.MID',
-        'HIGH VARIANT':     'POP.PROJ.MAX',
-        'LOW VARIANT':      'POP.PROJ.LOW',
-        'CONSTANT-FERTILITY': 'POP.PROJ.CONST',
-        'ZERO-MIGRATION':   'POP.PROJ.ZERO',
-        'NO CHANGE':        'POP.PROJ.STATIC'
-    } 
-
-    table_dict = pandas.read_excel(filename, sheetname = None, skiprows = 15) #Creates a dict of dataframes.
-
-    for subject_name, sheet in table_dict.items():
-        subject_code = subject_keymap[subject_name]
-
-        table['subjectCode'] = [subject_code for i in len(table)]
-        table['subjectName'] = [subject_name for i in len(table)]
-
-    
-    full_table = pandas.concat(table_dict.values())
-
-    subject_description_map = {
-
-    }
-
-    configuration = {
-        
-    }
 

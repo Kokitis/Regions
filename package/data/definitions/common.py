@@ -43,6 +43,13 @@ agencies = [
 		'code': 'EUR',
 		'name': 'Eurostat',
 		'url': "http://ec.europa.eu/eurostat"
+	},
+
+	{
+		'code': 'UN',
+		'name': 'United Nations',
+		'url' : 'http://www.un.org/en/index.html',
+		'address': "902 Broadway, 4th Floor New York, NY 10010"
 	}
 ]
 
@@ -88,7 +95,9 @@ files = [
 	("namespaces\\NUTS2013-NUTS2016.xls", 'NUTS'),
 	("namespaces\\fips_codes_website.xls)", 'FIPS'),
 	("Global\\World Economic Outlook April 2017.xlsx", 'WEO', 'World Economic Outlook'),
-	("Global\\World Development Indicators\\WDIEXCEL.xlsx", "WDI", "World Development Indicators")
+	("Global\\World Development Indicators\\WDIEXCEL.xlsx", "WDI", "World Development Indicators"),
+	("Global\\Population\\UN World Population Prospects, 2017\\WPP2017_POP_F01_1_TOTAL_POPULATION_BOTH_SEXES.xlsx", 'WPP2017', 'World Population Prospects, 2017'),
+	("Global\\Population\\UN World Population Prospects, 2015\\tabula-WPP2015_Volume-I_Comprehensive-Tables.xlsx", 'WPP2015', 'World Population Prospects, 2015 Revision')
 ]
 
 ignore = [

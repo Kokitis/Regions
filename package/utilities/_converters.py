@@ -40,7 +40,7 @@ class ConvertTable:
 			* 'regionNameColumn'
 	"""
 	def __init__(self, dataset, filename, namespace, report, **kwargs):
-		print("Converting ", filename)
+
 		self.dataset = dataset
 		assert isinstance(namespace, str)
 		assert isinstance(report, dict)
@@ -75,9 +75,6 @@ class ConvertTable:
 
 		# Get the relevant columns for the data.
 		column_categories = self.parseTableColumns(table.columns, **kwargs)
-		#print("Column Categories:")
-		#for k, v in column_categories.items():
-		#	print("\t{}\t{}".format(k, v))
 
 		json_table = list()
 		pbar = progressbar.ProgressBar(max_value = len(table))
@@ -228,12 +225,17 @@ class ConvertTable:
 		whitelist = kwargs.get('whitelist')
 
 		# Should be static
-		region_code = row[column_classifier['regionCodeColumn']] # identifier
-		region_name = row[column_classifier['regionNameColumn']]
+		try:
+			region_code = row[column_classifier['regionCodeColumn']] # identifier
+			region_name = row[column_classifier['regionNameColumn']]
 
-		subject_code = row[column_classifier['seriesCodeColumn']]
-		subject_name = row[column_classifier['seriesNameColumn']]
-
+			subject_code = row[column_classifier['seriesCodeColumn']]
+			subject_name = row[column_classifier['seriesNameColumn']]
+		except KeyError as exception:
+			print(str(exception))
+			for k, v in row.items():
+				print("\t{}\t{}".format(k, v))
+			raise exception
 		_in_whitelist 		= (not whitelist or subject_code in whitelist)
 		_not_in_blacklist 	= (not whitelist and subject_code not in blacklist)
 		use_row 			= _in_whitelist or _not_in_blacklist
@@ -295,6 +297,7 @@ class ConvertTable:
 			if isinstance(unit_code, str):
 				result['unitCode'] = unit_code
 
+
 		return result
 
 	def _getScale(self, row, region_code, subject_code, column_classifier, scale_map):
@@ -342,7 +345,7 @@ class ConvertTable:
 		elif callable(mapper):
 			result = mapper(region_code, subject_code)
 		else:
-			message = "'{}' ('{}') is not a valid tagMap object".format(mapper, type(mapper))
+			message = "'{}' ('{}') is not a valid Map object".format(mapper, type(mapper))
 			raise ValueError(message)
 		
 		return result

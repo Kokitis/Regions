@@ -3,7 +3,7 @@ class AbstractRegion:
 		all other Region entities must have. It also implements convienience
 		methods for handling and displaying Region Entities. 
 	"""
-	def getSeries(self, string):
+	def getSeries(self, string, report = None):
 		""" Retrieves a specific series for this region.
 			If more than one series is found, raises a ValueError.
 			Parameters
@@ -16,7 +16,10 @@ class AbstractRegion:
 				series: Series
 		"""
 
-		result = self.series.select(lambda s: s.code == string or s.name == string).first()
+		result = self.series.select(lambda s: s.code == string or s.name == string)
+		if report:
+			result = result.filter(lambda s: s.report.name == report or s.report.code == report)
+		result = result.first()
 		return result
 
 	def show(self, section = 'all'):

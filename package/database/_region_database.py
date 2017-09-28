@@ -218,7 +218,6 @@ class RegionDatabase:
 					Returns a single result
 		"""
 		region = self.getRegion(region)
-
 		
 		_filter = lambda s: (s.code == key or s.name == key) and s.region == region
 		
@@ -227,7 +226,6 @@ class RegionDatabase:
 		if select_one and len(series) > 0:
 			series = series[0]
 		return series
-
 
 	@pony.orm.db_session
 	def _searchEntity(self, entity_class, *args, **kwargs):
@@ -377,16 +375,31 @@ class RegionDatabase:
 			arguments = validation.parseEntityArguments(entity_type, data)
 		elif hasattr(data, 'entity_type'):
 			if data.entity_type != entity_type:
-				message = "the entity passed to the function ('{}') does not match the requested entity type ('{}')".format(data.entity_type, entity_type)
+				message = "the entity passed to the function ('{}') does not match the requested entity type ('{}')".format(
+					data.entity_type, entity_type
+				)
 				raise TypeError(message)
 			else:
 				return data
+
 		elif isinstance(data, str):
 			arguments = {}
+			if len(data) < 4:
+				arguments['code'] = data 
+			else:
+				arguments['name'] = data
 		else:
 			arguments = data
 
 		if method == 'get':
+			try:
+				assert len(arguments) != 0
+			except AssertionError:
+				print('Method: ', method)
+				print("Entity Type: ", entity_type)
+				print("Data: ", data) 
+				print("Arguments: ", arguments)
+				raise AssertionError
 			result = self._selectEntity(entity_class, **arguments)
 
 		elif method in {'import', 'search'}:
@@ -403,7 +416,7 @@ class RegionDatabase:
 	def addNamespace(self, key):
 		""" Adds a namespace to the database.
 		""" 
-		namespace = self.access('get', 'namespace', code = key)
+		namespace = self.access('import', 'namespace', code = key)
 		if namespace: return namespace
 		if key == 'ISO':
 			namespace = namespaces.importIsoNamespace(self)
@@ -494,6 +507,7 @@ class RegionDatabase:
 						* 'unitString': str
 					* seriesValues: list
 		"""
+		print("Importing from JSON", flush = True)
 		namespace_code = data['namespace']
 		self.addNamespace(namespace_code)
 		
@@ -506,7 +520,7 @@ class RegionDatabase:
 		report = self.access('import', 'report', data['report'])
 
 		skipped_region_codes = set()
-		skipped = list()
+		skipped = set()
 		print("Importing the converted series into the database...")
 		pbar = progressbar.ProgressBar(max_value = len(data['series']))
 		for index, row in enumerate(data['series']):
@@ -522,8 +536,8 @@ class RegionDatabase:
 					#print("\tRegion Code:\t'{}'\t{}".format(region_code, type(region_code)))
 					#print("\tRegion Name:\t'{}'\t{}".format(region_name, type(region_name)))
 					#print("\tNamespace:\t'{}'".format(namespace_code))
-					skipped_region_codes.add(region_code)
-					skipped.append((region_code, region_name, namespace_code))
+					skipped_region_codes.add(str(region_code))
+					skipped.add((region_code, region_name, namespace_code, row['seriesCode']))
 				continue
 				#raise ValueError
 
@@ -561,9 +575,12 @@ class RegionDatabase:
 
 			#pprint(series_json)
 			self.importSeries(series_json)
+		
 		print("Could not locate these regions: ")
 		for item in skipped:
-			rc, rn, ns = item
+			rc, rn, ns, sc= item
 			print("\tRegion Code:\t", region_code)
 			print("\t\tRegion Name:\t", region_name)
 			print("\t\tNamespace:\t", ns)
+			print("\t\tSeries Code:\t", sc)
+		print("Imported {} of {} series".format(len(data['series']) - len(skipped), len(data['series'])))

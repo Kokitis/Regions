@@ -10,17 +10,20 @@ def compareSeries(left, right):
     if left.region.name == right.region.name:
         print("Region Name: ", left.region.name)
     else:
-        print("Region Name: ", left.region.name,'\t', right.region.name)
+        print("Region Names: ", left.region.name,'\t', right.region.name)
     
     if left.name == right.name:
         print("Series Name: ", left.name)
     else:
-        pass
+        print("Series Names: ", left.name, '\t', right.name)
     
     if left.report.name == right.report.name:
         print(left.report.name)
     else:
-        pass
+        print("Reports:")
+        print("\t", left.report.name)
+        print("\t", right.report.name)
+    
     print("\tYear\t\tLeft\tRight\tDiff\tRatio")
     for l, r in zip_longest(left, right, fillvalue = None):
         if r is None:
