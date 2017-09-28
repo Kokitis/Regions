@@ -26,7 +26,6 @@ def searchRegions(regions, dataset, namespace = 'ISO', subtype = 'iso3'):
 			best_match, score = process.extractOne(region_name, region_names)
 			if score < 90:
 				best_match = None
-				identifier = None 
 			else:
 				#print(best_match)
 				best_match = dataset.access('search', 'region', best_match)
@@ -38,7 +37,7 @@ def searchRegions(regions, dataset, namespace = 'ISO', subtype = 'iso3'):
 			#print(ids)
 			#for i in ids:
 				#print(regex.findall(i).groupdict())
-			identifier = [i for i in ids if regex.search(i)[subtype]]
+			identifier = [i for i in ids if regex.search(i).groupdict(subtype)]
 			if len(identifier) == 1:
 				identifier = identifier[0]
 			else:

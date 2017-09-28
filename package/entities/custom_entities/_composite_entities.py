@@ -77,23 +77,26 @@ class CompositeRegion(EmulatorRegion):
 	def series(self):
 		return list(self._loaded_series.values())
 
-	def _loadSeries(self, key):
-		_series = CompositeSeries([i.getSeries(key) for i in self.subRegions], region = self)
+	def _loadSeries(self, key, report):
+		_series = CompositeSeries([i.getSeries(key, report) for i in self.subRegions], region = self)
 		return _series
 
-	def getSeries(self, key):
+	def getSeries(self, key, report = None):
 		""" Retrieves a series for the Composite Series
 			Parameters
 			----------
 				key: str [CODE]
-					A valid series code. 
+					A valid series key
+				report: str; default None
+					A valid report.
 			
 			Returns
 			-------
 				series: CompositeSeries
 		"""
+
 		if key not in self._series:
-			self._loaded_series[key] = self._loadSeries(key)
+			self._loaded_series[key, report] = self._loadSeries(key, report)
 		return self._loaded_series[key]
 
 

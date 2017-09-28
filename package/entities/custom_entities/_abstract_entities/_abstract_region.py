@@ -10,6 +10,9 @@ class AbstractRegion:
 			----------
 				string: str
 					The name or code of a series to retrieve.
+				report: str; default None
+					The name or code of a report in the database. If not provided,
+					the first series found will be returned.
 
 			Returns
 			-------

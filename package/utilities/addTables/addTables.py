@@ -1,10 +1,7 @@
 """ Contains default configurations for common tables used in the database such as
     the World Economic Outlook and Word Development Indicators
 """
-import pandas
-import math 
 from functools import partial
-from pony.orm import db_session
 
 from ...data import getDefinition
 from ...github import tabletools
@@ -14,11 +11,14 @@ def addReport(dataset, string, *args):
     """ Adds the selected report to the dataset. """
 
     if string in {'WEO', 'World Economic Outlook'}:
-        result = addWorldEconomicOutlook(dataset) 
+        result = _addWorldEconomicOutlook(dataset)
     elif string in {'WDI', 'World Development Indicators'}:
-        result = addWorldDevelopmentIndicators(dataset) 
+        result = _addWorldDevelopmentIndicators(dataset)
     elif string.startswith('WPP'):
         result = addWorldPopulationProspects(dataset, *args)
+    else:
+        message = "Incorect report key: ''".format(string)
+        raise ValueError(message)
     return result
 def _addWorldEconomicOutlook(dataset):
     """

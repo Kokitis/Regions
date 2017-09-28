@@ -579,8 +579,8 @@ class RegionDatabase:
 		print("Could not locate these regions: ")
 		for item in skipped:
 			rc, rn, ns, sc= item
-			print("\tRegion Code:\t", region_code)
-			print("\t\tRegion Name:\t", region_name)
+			print("\tRegion Code:\t", rc)
+			print("\t\tRegion Name:\t", rn)
 			print("\t\tNamespace:\t", ns)
 			print("\t\tSeries Code:\t", sc)
 		print("Imported {} of {} series".format(len(data['series']) - len(skipped), len(data['series'])))
