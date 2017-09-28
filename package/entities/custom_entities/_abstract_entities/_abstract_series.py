@@ -27,8 +27,8 @@ class AbstractSeries:
 		if interpolate:
 			value = self._interpolate(x)
 		else:
-			value = float(self._interpolate(x)) if x in self.x else math.nan
-
+			value = self._interpolate(x) if x in self.x else math.nan
+		value = float(value)
 		return value
 
 	def __iter__(self):

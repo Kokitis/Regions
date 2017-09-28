@@ -1,45 +1,32 @@
 from itertools import zip_longest
 import math
-
+from texttable import Texttable
 def compareSeries(left, right):
-    """ Compares two Series objects against each other.
-        Parameters
-        ----------
-            left, right: Series
-    """
-    if left.region.name == right.region.name:
-        print("Region Name: ", left.region.name)
-    else:
-        print("Region Names: ", left.region.name,'\t', right.region.name)
-    
-    if left.name == right.name:
-        print("Series Name: ", left.name)
-    else:
-        print("Series Names: ", left.name, '\t', right.name)
-    
-    if left.report.name == right.report.name:
-        print(left.report.name)
-    else:
-        print("Reports:")
-        print("\t", left.report.name)
-        print("\t", right.report.name)
-    
-    print("\tYear\t\tLeft\tRight\tDiff\tRatio")
-    for l, r in zip_longest(left, right, fillvalue = None):
-        if r is None:
-            r_x, r_y = math.nan, math.nan
-        else:
-            r_x, r_y = r.x, r.y
-        if l is None:
-            l_x, l_y = math.nan, math.nan
-        else:
-            l_x, l_y = l.x, l.y
-            
-        diff = l_y - r_y
-        ratio = (l_y / r_y)# * 100
-        
-        line = "\t{}\t{:10.1f}{:10.1f}{:10.1f}\t{:.1%}".format(
-            l_x, l_y, r_y, diff, ratio
-        )
-            
-        print(line)
+	""" Compares two Series objects against each other.
+		Parameters
+		----------
+			left, right: Series
+	"""
+	left_str = "{} ({}) ({})".format(left.name, left.report.code, left.region.name)
+	right_str = "{} ({}) ({})".format(right.name, right.report.code, right.region.name)
+	field_names = ['Year', left_str, right_str, 'Difference', 'PCT']
+	table = Texttable()
+	table.add_row(field_names)
+	#table.add_row()
+	table.set_cols_dtype(['i', 'e', 'e', 'e', 't'])
+	
+	common_x = set(left.x) & set(right.x)
+	#print("\tYear\t\tLeft\tRight\tDiff\tRatio")
+	for year in sorted(common_x):
+		l = left(year)
+		r = right(year)
+			
+		diff = l - r
+		ratio = (r / l)# * 100
+
+		pct = (r - l) / l
+		pct = "{:.2%}".format(pct)
+
+		table.add_row([year, l, r, diff, pct])    
+		#print(line)
+	return table
