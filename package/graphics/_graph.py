@@ -181,7 +181,7 @@ class RegionPlot:
     def _plotSeries(self, other, **kwargs):
                  
         for other_series in other:
-            if len(other_series) == 0:
+            if len(other_series.x) == 0:
                 print("Empty Series: ", other_series)
                 continue
             
