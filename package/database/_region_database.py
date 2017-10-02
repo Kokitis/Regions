@@ -78,7 +78,7 @@ class RegionDatabase:
 
 		if filename in standard_datasets:
 			filename = standard_datasets[filename]
-
+		self.filename = filename
 
 		_database = pony.orm.Database()
 		_entities = entities.importDatabaseEntities(_database)
@@ -508,6 +508,11 @@ class RegionDatabase:
 					* seriesValues: list
 		"""
 		print("Importing from JSON", flush = True)
+		if os.path.exists(self.filename):
+			db_size = os.path.getsize(self.filename) / 1024**2
+		else:
+			db_size = 0.0
+		print("size of database: {:.2f} MB".format(db_size))
 		namespace_code = data['namespace']
 		self.addNamespace(namespace_code)
 		
@@ -575,7 +580,9 @@ class RegionDatabase:
 
 			#pprint(series_json)
 			self.importSeries(series_json)
-		
+		print("Imported {} of {} series".format(len(data['series']) - len(skipped), len(data['series'])))
+		db_size = os.path.getsize(self.filename) / 1024**2
+		print("Size of database: {:.2f} MB".format(db_size))
 		print("Could not locate these regions: ")
 		for item in skipped:
 			rc, rn, ns, sc= item
@@ -583,4 +590,4 @@ class RegionDatabase:
 			print("\t\tRegion Name:\t", rn)
 			print("\t\tNamespace:\t", ns)
 			print("\t\tSeries Code:\t", sc)
-		print("Imported {} of {} series".format(len(data['series']) - len(skipped), len(data['series'])))
+

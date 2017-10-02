@@ -9,16 +9,20 @@ class RegionPlot:
         self._colormap = dict()
         self._alphamap = dict()
         self._stylemap = dict()
+        self._is_formatted = False
+        if len(other) > 0:
+            self._plotSeries(other, **kwargs)
         
-        
-        self._plotSeries(other, **kwargs)
-        
-        self._setPlotOrigins(other[0])
-        self._addPlotLabels(other[0])
-        #self._formatTickLabels(self.ax.get_xticklabels())
-        self._addSignature(other[0])
-        self._generateLegend()
-    
+
+
+    def formatPlot(self, template):
+        if not self._is_formatted:
+            self._setPlotOrigins(template)
+            self._addPlotLabels(template)
+            #self._formatTickLabels(self.ax.get_xticklabels())
+            self._addSignature(template)
+            self._generateLegend()
+            self._is_formatted = True
     def _addSignature(self, template, kind = 'grey'):
         """ Adds text to the bottom of the graph with information about
             the agency and report the data comes from.
@@ -49,7 +53,7 @@ class RegionPlot:
         #x_bounds = min(x_pos) - 3.5
         #y_bounds = -500
         #_color_cast = lambda s: "{:>02X}".format(int(255 * s))
-        x_bounds = -0.05
+        x_bounds = (-0.05, 1)
         y_bounds = -0.1
         if kind == 'transparent':
             #_backgroundcolor = "".join(_color_cast(i) for i in self.ax.get_facecolor())
@@ -75,7 +79,7 @@ class RegionPlot:
             fontsize = 14,
             color = color,
             backgroundcolor = _backgroundcolor,
-            transform = self.ax.transAxes,
+            transform = self.ax.transAxes
         )
         #self.ax.text(x = min(template).x, y = .5, s = "(100, 100)")
         
@@ -116,7 +120,7 @@ class RegionPlot:
     
     def _getColor(self, string):
         _default_colors = [
-            '#008fd5', '#fc4f30', '#e5ae38'
+            '#008fd5', '#fc4f30', '#e5ae38',
             '#6d904f', '#8b8b8b', '#810f7c'
         ]
         
@@ -133,16 +137,20 @@ class RegionPlot:
             self._colormap[string] = color
         return color
     
-    def _getStyle(self, string):
+    def _getStyle(self, string, style = None):
         """
         [‘solid’ | ‘dashed’, ‘dashdot’, ‘dotted’ | (offset, on-off-dash-seq) | '-' | '--' | '-.' | ':' | 'None' | ' ' | '']
 
         """
-        _default_styles = ['-', '--', ':', '_.']
-        style = self._stylemap.get(string)
+        _default_styles = ['-', '--',':', '-.', 'None',' ',  '']
+        if style is not None:
+            self._stylemap[string] = style
+        else:
+            style = self._stylemap.get(string)
         if style is None:
+            
             index = len(self._stylemap)
-            style = _default_styles[index]
+            style = _default_styles[index%len(_default_styles)]
             self._stylemap[string] = style
         return style
 
@@ -200,16 +208,53 @@ class RegionPlot:
                     The series to plot. The colors, style, transparency,
                     and label will be added automatically.
             
+            Keyword Arguments
+            -----------------
+            color
+            linestyle
+            alpha
+            label
+            
         """
         _current_label = "{} {}".format(series.region.name, series.code)
-        _color = self._getColor(series.region.name)
-        _style = self._getStyle((series.name, series.code))
-        _alpha = self._getAlpha(series.report.name)
+
+        #_color = self._getColor(series.region.name)
+        #_style = self._getStyle((series.name, series.code))
+        #_alpha = self._getAlpha(series.report.name)
+        
+
+        kwargs['label'] = kwargs.get('label', _current_label)
+        _color = kwargs.get('color')
+        _style = kwargs.get('style')
+        _alpha = kwargs.get('alpha')
+        if _color is None:
+            _color = self._getColor(series.region.name)
+        if _style is None:
+            _style = self._getStyle((series.name, series.code), _style)
+        if _alpha is None:
+            _alpha = self._getAlpha(series.report.name)
 
         kwargs['color'] = _color
-        kwargs['linestyle'] = _style
+        kwargs['linestyle'] = _style 
         kwargs['alpha'] = _alpha
-        kwargs['label'] = _current_label
-
         result = self.ax.plot(series.x, series.y, **kwargs)
+
+        self.formatPlot(series)
         return result
+
+class ProjectionPlot(RegionPlot):
+    """ A version of the regionplot specialized for population projections."""
+
+    def addRegion(self, region, report):
+        """ Adds all series for a region from the provided report.
+        """
+
+        all_series = region.getSeries(report)
+
+        highest_series = max(all_series, lambda s: max(s.y))
+        lowest_series  = min([i for i in all_series if i != highest_series], lambda s: min(s.y))
+
+        other_series = [i for i in all_series if (i != highest_series and i != lowest_series)]
+
+
+

@@ -372,11 +372,19 @@ class AbstractSeries:
 		series_dict = {**series_dict, **identifiers, **values}
 
 		return series_dict
-	@staticmethod
-	def compareYears(initial_year, final_year):
+	
+	def compareYears(self, initial_year, final_year):
 		""" Describes how a series has changed over time.
 			Parameters
 			----------
 		"""
 
-		pass
+		a = self(initial_year)
+		b = self(final_year)
+
+		pct = (b - a) / a
+
+		return pct
+
+	def average(self):
+		return sum(self.y) / len(self.x)

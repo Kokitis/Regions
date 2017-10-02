@@ -156,7 +156,7 @@ def _addWorldDevelopmentIndicators(dataset, filename = None):
 		'GC.REV.SOCL.CN',       'SH.STA.SUIC.P5',       'AG.SRF.TOTL.K2',       'GC.TAX.TOTL.GD.ZS',    'GC.TAX.TOTL.CN', 
 		'EN.ATM.GHGT.ZG',       'EN.ATM.GHGT.KT.CE',    'IC.TAX.TOTL.CP.ZS',    'NE.TRD.GNFS.ZS',       'BG.GSR.NFSV.GD.ZS', 
 		'SL.UEM.TOTL.ZS',       'SL.UEM.TOTL.NE.ZS',    'SL.EMP.VULN.FE.ZS',    'SL.EMP.VULN.MA.ZS',    'SL.EMP.VULN.ZS', 
-		'SL.EMP.WORK.FE.ZS',    'SL.EMP.WORK.MA.ZS',    'SL.EMP.WORK.ZS'
+		'SL.EMP.WORK.FE.ZS',    'SL.EMP.WORK.MA.ZS',    'SL.EMP.WORK.ZS', 		'NV.IND.MANF.CD'
 	]
 
 	configuration = {
