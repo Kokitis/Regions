@@ -402,16 +402,9 @@ class RegionDatabase:
 	def getRegions(self, keys, namespace = None, return_type = 'regions'):
 		""" Searches for a number of regions. """
 
-		candidates = self.Identifier.select(lambda s: s.string in keys)
-		if namespace is not None:
-			namespace = self.access('get', 'namespace', namespace)
-			candidates = candidates.filter(lambda s: s.namespace == namespace)
+		for key in keys:
+			yield self.getRegion(key, namespace)
 
-		if return_type == 'regions':
-			candidates = [i.region for i in candidates]
-		else:
-			candidates = list(candidates)
-		return candidates
 
 	def getSeries(self, region, key, select_one = True):
 		"""	Retrieves a specific series for a given region.
