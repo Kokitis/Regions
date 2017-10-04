@@ -60,6 +60,7 @@ def importDatabaseEntities(db):
 		scale = Optional('Scale')
 
 		strvalues = Required(str)
+		#day = Optional(str)
 		tags 	= Set('Tag')
 		PrimaryKey(region, report, code)
 		entity_type = 'series'

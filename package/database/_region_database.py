@@ -15,14 +15,17 @@ from ..github import Texttable
 database_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "databases")
 
 standard_datasets = {
-	'global': os.path.join(database_folder, "global_database.sqlite"),
-	'europe': os.path.join(database_folder, "eurostat_database.sqlite")
+	'europe': os.path.join(database_folder, "eurostat_database.sqlite"),
+	'global': os.path.join(database_folder, "global_database.sqlite")
 }
 
 
 class RegionDatabase:
 	""" Accesses a database with information concerning various regions.
 	"""
+	###########################
+	# 
+	###########################
 	def __init__(self, filename, create = False):
 		"""
 			Parameters
@@ -30,11 +33,12 @@ class RegionDatabase:
 				filename: string
 					Either a path to a region database or the name of a commonly used database.
 		"""
-
 		self.create = create
-
 		self._main_database = self._initializeDatabase(filename, create)
 
+	##########################
+	#    Private Methods     #
+	##########################
 
 	def _getEntityClass(self, entity):
 		""" Matches an entity string to the corresponding class.
@@ -49,7 +53,6 @@ class RegionDatabase:
 		"""
 		if not isinstance(entity, str):
 			entity = entity.entity_type
-
 		if entity == 'agency':
 			_class = self.Agency
 		elif entity == 'identifier':
@@ -97,8 +100,6 @@ class RegionDatabase:
 		self.Tag 		= Tag
 		self.Unit 		= Unit
 		self.Scale 		= Scale
-
-
 
 		_database.bind("sqlite", filename, create_db = create) #create_tables
 		_database.generate_mapping(create_tables = create)
@@ -337,19 +338,29 @@ class RegionDatabase:
 		# List available regions
 		if section in {'all', 'regions'}:
 			print("Available Regions")
-			for region in sorted(self.Region.select(lambda s: s), key = lambda s: s.name):
+			for region in sorted(self.select('region', lambda s: s), key = lambda s: s.name):
 				print("\t", region.name)
+
+		display_table = Texttable()
+		display_table. set_cols_width([20, 20, 30, 60, 60])
+		display_table.add_row(['reportName', 'seriesCode', 'seriesName', 'seriesDescription', 'seriesNotes'])
 
 		# List available reports/subjects
 		if section in {'all', 'subjects', 'series', 'reports'}:
 			print("Available Reports")
-			for report in sorted(self.Report.select(lambda s: s), key = lambda s: s.name):
-				print("\t", report.name)
+			for report in self.select('report', lambda s: s):
+				#print("\t", report.name)
+				display_table.add_row([report.name, "", "", "", ""])
 				seen = set()
-				for series in sorted(report.rows, key = lambda s: s.name):
+				report_series  =self.select('series', lambda s: s.report == report)
+				report_series.order_by(lambda s: s.name)
+				for series in report_series:
 					if series.code in seen: continue
 					else: seen.add(series.code)
-					print("\t\t{:<12}\t{}".format("'{}'".format(series.code), series.name))
+					#print("\t\t{:<12}\t{}".format("'{}'".format(series.code), series.name))
+					display_table.add_row(["", "'{}'".format(series.code), series.name, series.description, series.notes])
+		print(display_table.draw())
+		return display_table
 
 	@pony.orm.db_session
 	def getRegion(self, keys, namespace = None):
@@ -376,11 +387,6 @@ class RegionDatabase:
 		if namespace is not None:
 			namespace = self.access('get', 'namespace', namespace)
 			candidates = candidates.filter(lambda s: s.namespace == namespace)
-		#candidates = [i for i in candidates if i.string in keys]
-
-		#if len(candidates) == 0:
-		#	candidates = list(self.Region.select(lambda s: s.name in keys))
-
 
 		if len(candidates) > 1:
 			message = "Error when searching for regions!"
@@ -399,7 +405,7 @@ class RegionDatabase:
 		return result
 	@pony.orm.db_session
 	def getRegions(self, keys, namespace = None, return_type = 'regions'):
-		""" Searches for a number of series. """
+		""" Searches for a number of regions. """
 
 		candidates = self.Identifier.select(lambda s: s.string in keys)
 		if namespace is not None:
@@ -422,16 +428,15 @@ class RegionDatabase:
 				select_one: bool; default True
 					Returns a single result
 		"""
-		region = self.getRegion(region)
+		#region = self.getRegion(region)
 
-		_filter = lambda s: (s.code == key or s.name == key) and s.region == region
+		_filter = lambda s: (s.code == key or s.name == key) and region in s.region.identifiers
 
 		series = region.series.select(_filter)
-		series = list(series)
-		if select_one and len(series) > 0:
-			series = series[0]
-		return series
 
+		if select_one and len(series) > 0:
+			series = series.first()
+		return series
 
 	@pony.orm.db_session
 	def importJson(self, data):
@@ -594,3 +599,12 @@ class RegionDatabase:
 			if not isinstance(series, dict):
 				series.tags.add(t)
 		return series
+
+	def select(self, entity_type, expression):
+		entity_class = self._getEntityClass(entity_type)
+		result = entity_class.select(expression)
+		return result
+	def get(self, entity_type, **kwargs):
+		entity_class = self._getEntityClass(entity_type)
+		result = entity_class.get(**kwargs)
+		return result

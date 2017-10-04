@@ -53,7 +53,7 @@ class RegionPlot:
         #x_bounds = min(x_pos) - 3.5
         #y_bounds = -500
         #_color_cast = lambda s: "{:>02X}".format(int(255 * s))
-        x_bounds = (-0.05, 1)
+        x_bounds = -0.05
         y_bounds = -0.1
         if kind == 'transparent':
             #_backgroundcolor = "".join(_color_cast(i) for i in self.ax.get_facecolor())
@@ -216,12 +216,8 @@ class RegionPlot:
             label
             
         """
-        _current_label = "{} {}".format(series.region.name, series.code)
-
-        #_color = self._getColor(series.region.name)
-        #_style = self._getStyle((series.name, series.code))
-        #_alpha = self._getAlpha(series.report.name)
-        
+       # _current_label = "{} {}".format(series.region.name, series.code)
+        _current_label = series.region.name
 
         kwargs['label'] = kwargs.get('label', _current_label)
         _color = kwargs.get('color')
@@ -230,14 +226,17 @@ class RegionPlot:
         if _color is None:
             _color = self._getColor(series.region.name)
         if _style is None:
-            _style = self._getStyle((series.name, series.code), _style)
+            _style = self._getStyle("{}|{}".format(series.name, series.code), _style)
         if _alpha is None:
             _alpha = self._getAlpha(series.report.name)
 
         kwargs['color'] = _color
         kwargs['linestyle'] = _style 
         kwargs['alpha'] = _alpha
+        kwargs['marker'] = '.'
+        kwargs['markersize'] = 10
         result = self.ax.plot(series.x, series.y, **kwargs)
+        #result = self.ax.scatter(series.x, series.y, color = kwargs['color'])
 
         self.formatPlot(series)
         return result
