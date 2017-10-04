@@ -77,8 +77,9 @@ class ConvertTable:
 		column_categories = self.parseTableColumns(table.columns, **kwargs)
 
 		json_table = list()
-		pbar = progressbar.ProgressBar(max_value = len(table))
 		print("Converting the table into a compatible json format...")
+		pbar = progressbar.ProgressBar(max_value = len(table))
+		
 		for index, row in enumerate(table):
 			pbar.update(index)
 			parsed_row = self.convertRow(row, column_categories, **kwargs)

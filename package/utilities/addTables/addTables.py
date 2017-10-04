@@ -42,8 +42,7 @@ def _addWorldEconomicOutlook(dataset):
 
 	tag_map = lambda rc,sc: 'POP' if sc == 'LP' else None
 
-	namespace = 'ISO'
-	ConvertTable(dataset, filename, namespace, report, blacklist = blacklist, seriesTagMap = tag_map)
+	ConvertTable(dataset, filename, 'ISO', report, blacklist = blacklist, seriesTagMap = tag_map)
 
 def _addWorldDevelopmentIndicators(dataset, filename = None):
 	""" Parameters

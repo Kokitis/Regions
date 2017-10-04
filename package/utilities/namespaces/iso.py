@@ -65,7 +65,7 @@ def importIsoNamespace(dataset):
 		region = dataset.getRegion([region_name] + result['identifiers'], namespace)
 
 		if region is None:
-			region = dataset.insertEntity('region', name = region_name, regionType = region_type)
+			region = dataset.access('insert', 'region', name = region_name, regionType = region_type)
 
 
 		if region is None:
@@ -86,5 +86,5 @@ def importIsoNamespace(dataset):
 				'value': identifier_string
 			}
 
-			dataset.insertEntity('identifier', **identifier_config)
+			dataset.access('insert', 'identifier', **identifier_config)
 	return namespace

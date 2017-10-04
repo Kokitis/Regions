@@ -131,31 +131,7 @@ class RegionDatabase:
 			message = "Entity creation failed due to incorrect arguments ({})".format(str(exception))
 			raise ValueError(message)
 		return result
-	@pony.orm.db_session
-	def _searchEntity(self, entity_class, *args, **kwargs):
-		"""	Requests an entity based on a variety of inputs. If nothing is found, returns None.
-			entity_class: Entity
-			*args: string, dict, Entity (Limit 1 argument)
-				Should map to the primary key of a single entity.
-			kwargs: dict<string>
-				Keyword arguments to use.
-		"""
 
-		if len(kwargs) == 0 and len(args) == 1:
-			entity_key = args[0]
-		else:
-			entity_key = kwargs
-
-		# Choose the method to use by the type of input
-		if isinstance(entity_key, str):
-			result = self._searchByString(entity_class, entity_key)
-		elif isinstance(entity_key, dict):
-			result = self._searchByKeywords(entity_class, **kwargs)
-		elif isinstance(entity_key, entity_class):
-			result = entity_key
-		else:
-			result = None
-		return result	
 	
 	@staticmethod
 	def _searchByString(entity_class, string, search_field = 'all'):
@@ -226,21 +202,47 @@ class RegionDatabase:
 
 		return result
 	
-	@staticmethod
-	def _selectEntity(entity_class, **kwargs):
-		""" Retrieves an entity based on available arguments.
-			If the entity is not found, returns None.
+
+	def _validateEntityArguments(self, entity_type, arg, **kwargs):
+		""" Validates parameters used to insert or retrieve entities from the database.
 			Parameters
 			----------
-				entity_class: Entity
-				**kwargs: Valid keyword arguments.
+			entity_type: str
+				One of the valid entity identifiers
+			arg: str, dict, None
+				Referes to either a key or name for a pre-existing entity 
+			**kwargs: Valid entity parameters
 		"""
-		try:
-			response = entity_class.get(**kwargs)
-		except ValueError:
-			response = None
+		if arg is None and len(kwargs) > 0:
+			arg = kwargs
 
-		return response
+		if isinstance(arg, dict):
+			arguments = validation.parseEntityArguments(entity_type, arg)
+		elif hasattr(arg, 'entity_type'):
+			if arg.entity_type != entity_type:
+				message = "the entity passed to the function ('{}') does not match the requested entity type ('{}')".format(
+					arg.entity_type, entity_type
+				)
+				raise TypeError(message)
+			else:
+				arguments = None
+
+		elif isinstance(arg, str):
+			arguments = {}
+			if len(arg) < 4 or arg.isupper():
+				arguments['code'] = arg
+			else:
+				arguments['name'] = arg
+		else:
+			message = "The paramters do not fit any excepted format: "
+			message += "\n" + str(arg)
+			raise ValueError(message)
+	
+		return arguments
+
+	##########################
+	#    Public Methods      #
+	##########################
 
 	@pony.orm.db_session
 	def access(self, method, entity_type, data = None, **kwargs):
@@ -261,42 +263,19 @@ class RegionDatabase:
 
 		entity_class = self._getEntityClass(entity_type)
 
-		if data is None and len(kwargs) > 0:
-			data = kwargs
+		arguments = self._validateEntityArguments(entity_type, data, **kwargs)
 
-		if isinstance(data, dict):
-			arguments = validation.parseEntityArguments(entity_type, data)
-		elif hasattr(data, 'entity_type'):
-			if data.entity_type != entity_type:
-				message = "the entity passed to the function ('{}') does not match the requested entity type ('{}')".format(
-					data.entity_type, entity_type
-				)
-				raise TypeError(message)
-			else:
-				return data
+		if arguments is None:
+			return data #Data is an entity object
 
-		elif isinstance(data, str):
-			arguments = {}
-			if len(data) < 4:
-				arguments['code'] = data
-			else:
-				arguments['name'] = data
-		else:
-			arguments = data
-
-		if method == 'get':
-			try:
-				assert len(arguments) != 0
-			except AssertionError:
-				print('Method: ', method)
-				print("Entity Type: ", entity_type)
-				print("Data: ", data)
-				print("Arguments: ", arguments)
-				raise AssertionError
-			result = self._selectEntity(entity_class, **arguments)
+		if method in {'get', 'retrieve'}:
+			result = self.get(entity_class, **arguments)
 
 		elif method in {'import', 'search'}:
-			result = self._searchEntity(entity_class, data, **arguments)
+			if isinstance(data, str):
+				result = self._searchByString(entity_class, data)
+			else:
+				result = self._searchByKeywords(entity_class,**arguments)
 		else:
 			result = None
 
@@ -309,9 +288,9 @@ class RegionDatabase:
 	def addNamespace(self, key):
 		""" Adds a namespace to the database.
 		"""
-		namespace = self.access('import', 'namespace', code = key)
-		if namespace: return namespace
-		if key == 'ISO':
+		namespace = self.access('get', 'namespace', code = key)
+		if namespace: pass
+		elif key == 'ISO':
 			namespace = namespaces.importIsoNamespace(self)
 		elif key == 'NUTS':
 			namespace = namespaces.importNutsNamespace(self)
@@ -326,8 +305,12 @@ class RegionDatabase:
 		#namespace = self.access('import', 'namespace', **namespace)
 
 		return namespace
+	
+	def contains(self, key):
+		""" Checks if a specific region exists based on name and/or identifier """
 
-
+		expression = lambda s: s.name == key or key in s.identifiers.string
+		return self.exists('region', expression)
 	def describe(self, section = 'all'):
 		"""
 			Parameters
@@ -361,6 +344,17 @@ class RegionDatabase:
 					display_table.add_row(["", "'{}'".format(series.code), series.name, series.description, series.notes])
 		print(display_table.draw())
 		return display_table
+	def exists(self, entity_type, expression):
+		entity_class = self._getEntityClass(entity_type)
+		response = entity_class.exists(expression)
+		return response
+
+	def get(self, entity_type, **kwargs):
+		entity_class = self._getEntityClass(entity_type)
+		result = entity_class.get(**kwargs)
+		return result
+
+
 
 	@pony.orm.db_session
 	def getRegion(self, keys, namespace = None):
@@ -403,6 +397,7 @@ class RegionDatabase:
 			result = candidates.first().region
 
 		return result
+	
 	@pony.orm.db_session
 	def getRegions(self, keys, namespace = None, return_type = 'regions'):
 		""" Searches for a number of regions. """
@@ -439,7 +434,7 @@ class RegionDatabase:
 		return series
 
 	@pony.orm.db_session
-	def importJson(self, data):
+	def importJson(self, data, verbose = False):
 		""" Imports a series into the database.
 			Parameters
 			----------
@@ -533,18 +528,16 @@ class RegionDatabase:
 		print("Imported {} of {} series".format(len(data['series']) - len(skipped), len(data['series'])))
 		db_size = os.path.getsize(self.filename) / 1024**2
 		print("Size of database: {:.2f} MB".format(db_size))
-		print("Could not locate these regions: ")
-		table = Texttable()
-		table.add_rows(['Region Code', 'Region Name', 'Namespace', 'Series Code'])
-		for item in skipped:
-			#rc, rn, ns, sc= item
-			table.add_row(item)
-			#print("\tRegion Code:\t", rc)
-			#print("\t\tRegion Name:\t", rn)
-			#print("\t\tNamespace:\t", ns)
-			#print("\t\tSeries Code:\t", sc)
+		if verbose:
+			print("Could not locate these regions: ")
+			table = Texttable()
+			table.add_row(['Region Code', 'Region Name', 'Namespace', 'Series Code'])
+			for item in sorted(skipped):
+				#rc, rn, ns, sc= item
+				table.add_row([(str(i) if str(i) != 'nan'  else "") for i in item])
 
-		print(table.draw())
+
+			print(table.draw())
 
 	@pony.orm.db_session
 	def importSeries(self, series):
@@ -603,8 +596,4 @@ class RegionDatabase:
 	def select(self, entity_type, expression):
 		entity_class = self._getEntityClass(entity_type)
 		result = entity_class.select(expression)
-		return result
-	def get(self, entity_type, **kwargs):
-		entity_class = self._getEntityClass(entity_type)
-		result = entity_class.get(**kwargs)
 		return result
