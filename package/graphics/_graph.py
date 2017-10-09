@@ -4,20 +4,38 @@ import matplotlib.pyplot as plt
 
 class RegionPlot:
     def __init__(self, *other, **kwargs):
-        plt.style.use('fivethirtyeight')
+
+
+        self._format_options = {
+            'figsize': (20, 10), # Width and heigh (in inches) to make the plot. 
+            'xMin': None,
+            'xMax': None,
+            'xLabel': 'N/A',
+            'yMin': None,
+            'yMax': None,
+            'reference': 0.0, # Point to consider as the reference point. Ex. 100 for ratios
+            'plotStyle': 'fivethirtyeight'
+        }
+
+        plt.style.use(self._format_options['plotStyle'])
         self.fig, self.ax = self._createPlot()
         self._colormap = dict()
         self._alphamap = dict()
         self._stylemap = dict()
         self._is_formatted = False
+        self._min_x = None
+        self._max_x =None
+
+
         if len(other) > 0:
             self._plotSeries(other, **kwargs)
+            #self.formatPlot(other[0])
         
 
 
     def formatPlot(self, template):
         if not self._is_formatted:
-            self._setPlotOrigins(template)
+            self._setPlotOrigins()
             self._addPlotLabels(template)
             #self._formatTickLabels(self.ax.get_xticklabels())
             self._addSignature(template)
@@ -83,15 +101,19 @@ class RegionPlot:
         )
         #self.ax.text(x = min(template).x, y = .5, s = "(100, 100)")
         
-    def _setPlotOrigins(self, template):
+    def _setPlotOrigins(self):
         
         # Generate a bolded horizontal line at y = 0 
-        self.ax.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
-        x_lims = (min(template.x), max(template.x))
-        self.ax.set_xlim(left = min(x_lims) - 1, right = max(x_lims) + 1)
-    @staticmethod
-    def _createPlot():
-        fig, ax = plt.subplots(figsize = (20, 10))
+        reference_line = self._format_options['reference']
+        minimum_x = self._format_options['xMin']
+        maximum_x = self._format_options['xMax']
+
+        self.ax.axhline(y = reference_line, color = 'black', linewidth = 1.3, alpha = .7)
+
+        self.ax.set_xlim(left = minimum_x - 1, right = maximum_x + 1)
+    
+    def _createPlot(self):
+        fig, ax = plt.subplots(figsize = self._format_options['figsize'])
         #ax.tick_params(axis = 'both', which = 'major', labelsize = 18)
         return fig, ax
     def _generateLegend(self):
@@ -100,9 +122,11 @@ class RegionPlot:
         """
         _colors = list()
         _styles = list()
+
         for _region_name, _region_color in self._colormap.items():
             line, = plt.plot([1,2,3], c = _region_color, label = _region_name)
             _colors.append(line)
+        
         for _subject_name, _subject_style in self._stylemap.items():
             line, = plt.plot([1,2,3], c = 'k', linestyle = _subject_style, label = _subject_name)
             _styles.append(line)
@@ -217,15 +241,27 @@ class RegionPlot:
             
         """
        # _current_label = "{} {}".format(series.region.name, series.code)
-        _current_label = series.region.name
+        #_current_label = series.region.name
+        _min_x = self._format_options['xMin']
+        _max_x = self._format_options['xMax']
 
-        kwargs['label'] = kwargs.get('label', _current_label)
+        _min_x = min(series.x) if _min_x is None else min(_min_x, min(series.x))
+        _max_x = max(series.x) if _max_x is None else max(_max_x, max(series.x))
+
+        self._format_options['xMin'] = _min_x
+        self._format_options['xMax'] = _max_x
+
+
+        #kwargs['label'] = kwargs.get('label', _current_label)
         _color = kwargs.get('color')
-        _style = kwargs.get('style')
+        _style = kwargs.get('style', kwargs.get('linestyle'))
         _alpha = kwargs.get('alpha')
+
         if _color is None:
             _color = self._getColor(series.region.name)
         if _style is None:
+            kwargs['marker'] = '.'
+            kwargs['markersize'] = 10
             _style = self._getStyle("{}|{}".format(series.name, series.code), _style)
         if _alpha is None:
             _alpha = self._getAlpha(series.report.name)
@@ -233,12 +269,18 @@ class RegionPlot:
         kwargs['color'] = _color
         kwargs['linestyle'] = _style 
         kwargs['alpha'] = _alpha
-        kwargs['marker'] = '.'
-        kwargs['markersize'] = 10
-        result = self.ax.plot(series.x, series.y, **kwargs)
+
+
+
+        print("Manualy setting y")
+        if max(series.y) >1000000:
+            series_y = series.y
+        else:
+            series_y = [i*1000 for i in series.y]
+        result = self.ax.plot(series.x, series_y, **kwargs)
         #result = self.ax.scatter(series.x, series.y, color = kwargs['color'])
 
-        self.formatPlot(series)
+        #self.formatPlot(series)
         return result
 
 class ProjectionPlot(RegionPlot):

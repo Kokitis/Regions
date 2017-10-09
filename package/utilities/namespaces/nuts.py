@@ -6,7 +6,7 @@ from ...github import tabletools
 
 
 @db_session
-def importNutsNamespace(dataset):
+def importNutsNamespace(dataset): 
 	table = tabletools.Table(
 		getDefinition('namespace', 'NUTS'),
 		sheetname = "NUTS2013-NUTS2016", 

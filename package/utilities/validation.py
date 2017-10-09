@@ -173,7 +173,8 @@ def parseEntityArguments(entity_type, entity_args = None, **kwargs):
 			'scale': parseKeywords(result,  ['scale', 'Scale', 'seriesScale', 'subjectScale']),
 			'strvalues': parseKeywords(result, ['strvalues']),
 			'values': parseKeywords(result, ['values', 'seriesValues']),
-			'tags': parseKeywords(result, ['tags', 'attributes'])
+			'tags': parseKeywords(result, ['tags', 'attributes']),
+			'description': parseKeywords(result, ['seriesDescription', 'description', 'subjectDescription'])
 		}
 	elif entity_type == 'unit':
 		args = {

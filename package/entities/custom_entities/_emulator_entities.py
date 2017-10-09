@@ -5,7 +5,7 @@ class EmulatorRegion(AbstractRegion):
 		for any other Region entity. 
 	"""
 
-	def __init__(self, template, db = None, **kwargs):
+	def __init__(self, template, **kwargs):
 		"""
 			Parameters
 			----------
@@ -28,12 +28,6 @@ class EmulatorRegion(AbstractRegion):
 		self._subregions 	= arguments['subRegions']
 		self._parentRegion 	= arguments['parentRegion']
 
-		if db is not None:
-			self.get = db.Region.get 
-			self.select = db.Region.select
-		else:
-			self.get = self._get 
-			self.select = self._select
 
 	@staticmethod
 	def _parseInputArguments(region, **kwargs):
@@ -71,20 +65,13 @@ class EmulatorRegion(AbstractRegion):
 	def parentRegion(self):
 		return self._parentRegion
 
-	@classmethod
-	def _get(cls, *args, **kwargs):
-		raise NotImplementedError
-
-	@classmethod 
-	def _select(cls, *args, **kwargs):
-		raise NotImplementedError
 
 
 class EmulatorSeries(AbstractSeries):
 	""" Defines a Series class that should work as a drop-in replacement for
 		any other Serise entity. 
 	"""
-	def __init__(self, template, values = None, db = None, **kwargs):
+	def __init__(self, template, values = None, **kwargs):
 		"""
 			Stores the combination of multiple series.
 			Parameters
@@ -121,12 +108,6 @@ class EmulatorSeries(AbstractSeries):
 
 		self._values = self._parseInputValues(values)
 
-		if db is not None:
-			self.get = db.Series.get 
-			self.select = db.Series.select 
-		else:
-			self.get = self._get 
-			self.select = self._select
 
 
 	def __repr__(self):
@@ -233,11 +214,3 @@ class EmulatorSeries(AbstractSeries):
 	@property
 	def strvalues(self):
 		return "||".join(["{}|{}".format(x, y) for x, y in self.values])
-
-	@classmethod 
-	def _get(cls, *args, **kwargs):
-		raise NotImplementedError
-
-	@classmethod
-	def _select(cls, *arsg, **kwargs):
-		raise NotImplementedError

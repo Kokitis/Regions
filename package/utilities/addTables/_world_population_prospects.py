@@ -56,8 +56,8 @@ def _addWorldPopulationProspects2017(dataset):
 		sheet.columns = [(i[1:] if i.startswith("'") else i) for i in sheet.columns]
 		subject_code = subject_keymap[subject_name]
 		notes_values = sheet['Notes'].values
-		sheet['subjectCode'] = [subject_code for i in notes_values]
-		sheet['subjectName'] = [subject_name for i in notes_values]
+		sheet['subjectCode'] = [subject_code for _ in notes_values]
+		sheet['subjectName'] = [subject_name for _ in notes_values]
 		sheet['seriesNotes'] = [(notes_dict.get(i) if isinstance(i, str) else None) for i in notes_values]
 		sheet['regionCode']  = ["{:>03}".format(i) for i in sheet['Country code'].values]
 
@@ -107,8 +107,8 @@ def _addWorldPopulationProspects2017(dataset):
 		'POP.PROJ.CONST.MORT': "Constant-mortality variant, 2015 - 2100"
 	}
 
-	def _series_desc_map_func_mapper(mapper, region_code, subject_code):
-		return mapper.get(subject_code)
+	def _series_desc_map_func_mapper(mapper, region_code, sc):
+		return mapper.get(sc)
 
 	_series_desc_map_func = partial(_series_desc_map_func_mapper, _series_description_map)
 
@@ -136,6 +136,7 @@ def _addWorldPopulationProspects2017(dataset):
 	}
 
 	ConvertTable(dataset, full_table, report = report, **configuration)
+	return None
 
 def _addWorldPopulationProspects2015(dataset):
 	
@@ -164,4 +165,5 @@ def _addWorldPopulationProspects2015(dataset):
 	}
 
 	ConvertTable(dataset, full_table, report = report, **configuration)
+	return None
 

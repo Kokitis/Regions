@@ -58,7 +58,7 @@ namespaces = [
 		'code': 	'ISO',
 		'name': 	'ISO 3166-1',
 		'subTypes': 'alpha-2,alpha-3,numeric',
-		'regex': 	'(?:<alpha-2>[A-Z]{2})|(?P<alpha-3>[A-Z]{3})|(?:<numeric>[\d]{3})',
+		'regex': 	"(?P<iso3>[A-Z]{3})|(?P<iso2>[A-Z]{2})|(?P<numeric>[0-9]{3})",
 		'url': 		'https://www.iso.org/iso-3166-country-codes.html',
 		'wiki': 	'https://en.wikipedia.org/wiki/ISO_3166-1',
 		'agency': 	'International Organization for Standardization'

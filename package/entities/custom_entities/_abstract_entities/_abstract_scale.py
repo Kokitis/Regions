@@ -1,7 +1,10 @@
+from ....github import numbertools
 
 class AbstractScale:
 	def __float__(self):
-		""" Converts 'Scale' to a floating-point datatype """
+		""" Returns a floating-point represenation f 'Scale'
+			Ex. Scale('Thousands') -> 1E3
+		"""
 		if self.multiplier:
 			return float(self.multiplier)
 		
@@ -27,10 +30,26 @@ class AbstractScale:
 
 		return 1.0
 
+	def __str__(self):
+		return "Scale('{}')".format(self.scale)
 
+	def __call__(self, array, human_readable = False):
+		""" Returns the scaled version of the provided array.
+			Ex. Scale('Hundreds')([1,2,3]) -> [100, 200, 300]
+			Ex. Scale('Millions')(314) -> 314,000,000
+			Ex. Scale('Thousands')([31.4, 2, 3], human_readable = True) -> ['31.4K', '200K', '300K']
+		"""
+		if not hasattr(array, '__iter__'):
+			array = [array]
+
+		result = [i * float(self) for i in array]
+
+		if human_readable:
+			result = numbertools.humanReadable(array)
+		return result
 
 	def __mul__(self, other):
-		""" Multiplies a value by the value of 'scale' """
+		""" Multiplies a value by the floating-point representation of this Scale object."""
 
 		result = other * float(self)
 

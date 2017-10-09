@@ -10,7 +10,7 @@ import progressbar
 from .. import entities
 from ..data import getDefinition
 from ..utilities import namespaces, validation
-from ..github import Texttable
+from ..github import Texttable, timetools
 
 database_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "databases")
 
@@ -202,8 +202,8 @@ class RegionDatabase:
 
 		return result
 	
-
-	def _validateEntityArguments(self, entity_type, arg, **kwargs):
+	@staticmethod
+	def _validateEntityArguments(entity_type, arg, **kwargs):
 		""" Validates parameters used to insert or retrieve entities from the database.
 			Parameters
 			----------
@@ -249,9 +249,9 @@ class RegionDatabase:
 		""" Access items from the database and adds them if desired.
 			Parameters
 			----------
-				method: {'get', 'search', 'request', 'import', 'insert'}
+				method: {'add', 'get', 'search', 'request', 'import', 'insert'}
 					* 'get', 'request': If the item cannot be found, returns None
-					* 'import': If the entity is not found, inserts it into the database.
+					* 'import', 'add': If the entity is not found, inserts it into the database.
 					* 'insert': inserts an entity into the database.
 
 				entity_type: {'agency', 'identifier', 'namespace', 'region', 'report', 'series'}
@@ -271,7 +271,7 @@ class RegionDatabase:
 		if method in {'get', 'retrieve'}:
 			result = self.get(entity_class, **arguments)
 
-		elif method in {'import', 'search'}:
+		elif method in {'add', 'import', 'search'}:
 			if isinstance(data, str):
 				result = self._searchByString(entity_class, data)
 			else:
@@ -279,7 +279,7 @@ class RegionDatabase:
 		else:
 			result = None
 
-		if method == 'insert' or (method == 'import' and result is None):
+		if method == 'insert' or (method in {'import', 'add'} and result is None):
 			result = self._insertEntity(entity_class, **arguments)
 
 		return result
@@ -376,7 +376,7 @@ class RegionDatabase:
 			keys = [keys]
 		keys = (i for i in keys if isinstance(i, str))
 
-		candidates = self.Identifier.select(lambda s: s.string in keys)
+		candidates = self.select('identifier', lambda s: s.string in keys)
 
 		if namespace is not None:
 			namespace = self.access('get', 'namespace', namespace)
@@ -399,7 +399,7 @@ class RegionDatabase:
 		return result
 	
 	@pony.orm.db_session
-	def getRegions(self, keys, namespace = None, return_type = 'regions'):
+	def getRegions(self, keys, namespace = None):
 		""" Searches for a number of regions. """
 
 		for key in keys:
@@ -427,7 +427,7 @@ class RegionDatabase:
 		return series
 
 	@pony.orm.db_session
-	def importJson(self, data, verbose = False):
+	def addJson(self, data, verbose = False):
 		""" Imports a series into the database.
 			Parameters
 			----------
@@ -446,6 +446,7 @@ class RegionDatabase:
 					* seriesValues: list
 		"""
 		print("Importing from JSON", flush = True)
+		timer = timetools.Timer()
 		if os.path.exists(self.filename):
 			db_size = os.path.getsize(self.filename) / 1024**2
 		else:
@@ -510,6 +511,7 @@ class RegionDatabase:
 				'tags': series_tags,
 				'values': row['values']
 			}
+			
 			if scale is not None:
 				series_json['scale'] = scale
 
@@ -517,10 +519,12 @@ class RegionDatabase:
 				series_json['description'] = series_description
 
 			#pprint(series_json)
+			
 			self.importSeries(series_json)
 		print("Imported {} of {} series".format(len(data['series']) - len(skipped), len(data['series'])))
 		db_size = os.path.getsize(self.filename) / 1024**2
 		print("Size of database: {:.2f} MB".format(db_size))
+		print("Finished in ", timer)
 		if verbose:
 			print("Could not locate these regions: ")
 			table = Texttable()
@@ -533,7 +537,7 @@ class RegionDatabase:
 			print(table.draw())
 
 	@pony.orm.db_session
-	def importSeries(self, series):
+	def addSeries(self, series):
 		""" Imports a series into the database.
 			Parameters
 			----------

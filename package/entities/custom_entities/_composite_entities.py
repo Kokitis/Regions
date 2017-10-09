@@ -1,6 +1,8 @@
-from ._emulator_entities import EmulatorRegion, EmulatorSeries
-from ...github import numbertools
 import pony
+
+from ...github import numbertools
+from ._emulator_entities import EmulatorRegion, EmulatorSeries
+
 
 class CompositeRegion(EmulatorRegion):
 	""" A region composed of a number of smaller regions.

@@ -1,6 +1,5 @@
 from fuzzywuzzy import process
 from pony.orm import select, db_session
-import re
 
 @db_session
 def searchRegions(regions, dataset, namespace = 'ISO', subtype = 'iso3'):
@@ -17,7 +16,7 @@ def searchRegions(regions, dataset, namespace = 'ISO', subtype = 'iso3'):
 	namespace = dataset.access('get', 'namespace', code = namespace)
 	print(namespace.regex)
 	regex = re.compile(namespace.regex)
-	regex = re.compile("(?P<iso3>[A-Z]{3})|(?P<iso2>[A-Z]{2})|(?P<numeric>[0-9]{3})")
+	#regex = re.compile("(?P<iso3>[A-Z]{3})|(?P<iso2>[A-Z]{2})|(?P<numeric>[0-9]{3})")
 	region_names = select(s.name for s in dataset.Region)
 	table = list()
 	for region_name in regions:

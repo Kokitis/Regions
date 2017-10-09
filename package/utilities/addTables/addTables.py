@@ -44,6 +44,8 @@ def _addWorldEconomicOutlook(dataset):
 
 	ConvertTable(dataset, filename, 'ISO', report, blacklist = blacklist, seriesTagMap = tag_map)
 
+	return None
+
 def _addWorldDevelopmentIndicators(dataset, filename = None):
 	""" Parameters
 		----------
@@ -52,56 +54,7 @@ def _addWorldDevelopmentIndicators(dataset, filename = None):
 		filename: str; default None
 			Path to a newly-downloaded version of the table. 
 	"""
-	print("Preparing to import the World Development Indicators...")
-	if filename is None:
-		filename = getDefinition('file', 'World Development Indicators')
 
-	data_sheet = tabletools.Table(filename, sheetname = 'Data')
-	notes_sheet = tabletools.Table(filename, sheetname = 'Country-Series')
-
-	series_sheet = tabletools.Table(filename, sheetname = 'Series')
-
-	_series_description_map = dict()
-	_series_tag_map = dict()
-	for row in series_sheet:
-		subject_code = row['Series Code']
-
-		definition = row['Long definition']
-		limitations=row['Limitations and exceptions']
-		methodology = row['Statistical concept and methodology']
-		relevance = row['Development relevance']
-
-		_series_description_map[subject_code] = definition
-		_tags = [
-			("Definition", str(definition)),
-			("Limitations", str(limitations)),
-			("Methodology", str(methodology)),
-			("Development Relevance", str(relevance))
-		]
-		_tags = ['|'.join(i) for i in _tags]
-		_series_tag_map[subject_code] = _tags
-
-	def _series_tag_map_func_mapper(mapper, region_code, subject_code):
-		return mapper.get(subject_code)
-
-	_series_tag_map_func = partial(_series_tag_map_func_mapper, _series_tag_map)
-
-	series_notes_map = dict()
-	for row in notes_sheet:
-		region_code = row['CountryCode']
-		subject_code = row['SeriesCode']
-		string = row['DESCRIPTION']
-
-		series_notes_map[(region_code, subject_code)] = string
-		
-
-	report = {
-		'name': "World Development Indicators",
-		'code': "WDI",
-		'publishDate': "2017-09-15",
-		'url': "https://data.worldbank.org/data-catalog/world-development-indicators",
-		'agency': 'World Bank'
-	}
 
 	whitelist = [
 		'PA.NUS.PPP.05',        'PA.NUS.PRVT.PP.05',    'NY.ADJ.NNTY.KD.ZG',    'NY.ADJ.NNTY.KD',       'NY.ADJ.NNTY.CD', 
@@ -158,18 +111,76 @@ def _addWorldDevelopmentIndicators(dataset, filename = None):
 		'SL.EMP.WORK.FE.ZS',    'SL.EMP.WORK.MA.ZS',    'SL.EMP.WORK.ZS', 		'NV.IND.MANF.CD'
 	]
 
+	print("Preparing to import the World Development Indicators...")
+	if filename is None:
+		filename = getDefinition('file', 'World Development Indicators')
+	print("Loading data table...")
+	
+	data_sheet = tabletools.Table(filename, sheetname = 'Data')
+	
+	print("Loading notes sheet...")
+	notes_sheet = tabletools.Table(filename, sheetname = 'Country-Series')
+
+	print("Loading sereis sheet...")
+	series_sheet = tabletools.Table(filename, sheetname = 'Series')
+
+	_series_description_map = dict()
+	_series_tag_map = dict()
+	print("Parsing series metadata...")
+	for row in series_sheet:
+		subject_code = row['Series Code']
+
+		definition = row['Long definition']
+		limitations=row['Limitations and exceptions']
+		methodology = row['Statistical concept and methodology']
+		relevance = row['Development relevance']
+
+		_series_description_map[subject_code] = definition
+		_tags = [
+			#("Definition", str(definition)),
+			("Limitations", str(limitations)),
+			("Methodology", str(methodology)),
+			("Development Relevance", str(relevance))
+		]
+		_tags = ['|'.join(i) for i in _tags]
+		_series_tag_map[subject_code] = _tags
+
+	def _series_tag_map_func_mapper(mapper, rc, sc):
+		return mapper.get(sc)
+
+	_series_tag_map_func = partial(_series_tag_map_func_mapper, _series_tag_map)
+	_series_description_map_func = partial(_series_tag_map_func_mapper, _series_description_map)
+	series_notes_map = dict()
+	print("Parsings notes sheet...")
+	for row in notes_sheet:
+		region_code = row['CountryCode']
+		subject_code = row['SeriesCode']
+		string = row['DESCRIPTION']
+
+		series_notes_map[(region_code, subject_code)] = string
+		
+
+	report = {
+		'name': "World Development Indicators",
+		'code': "WDI",
+		'publishDate': "2017-09-15",
+		'url': "https://data.worldbank.org/data-catalog/world-development-indicators",
+		'agency': 'World Bank'
+	}
+
 	configuration = {
 		'regionNameColumn': "Country Name",
 		'regionCodeColumn': "Country Code",
 		'subjectNameColumn': "Indicator Name",
 		'subjectCodeColumn': "Indicator Code",
-		'notesMap': series_notes_map,
 		'whitelist': whitelist,
-		'seriesDescriptionMap': _series_description_map,
+		'seriesNotesMap': series_notes_map,
+		'seriesDescriptionMap': _series_description_map_func,
 		'seriesTagMap': _series_tag_map_func
 	}
 
 	ConvertTable(dataset, data_sheet, namespace = 'ISO', report = report, **configuration)
+	return None
 
 
 def _defaultMadisonHistoricalTables(dataset):

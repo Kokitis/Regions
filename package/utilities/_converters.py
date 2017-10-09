@@ -1,5 +1,3 @@
-from pprint import pprint
-
 import progressbar
 
 from . import tables, validation
@@ -68,6 +66,14 @@ class ConvertTable:
 
 
 		"""
+		print("Import Table")
+		print("Raw Keyword Arguments:")
+		for k, v in kwargs.items():
+			if len(str(v)) < 100:
+				val = v
+			else:
+				val = "{} ({})".format(type(v), "")
+			print("\t", k, "\t", val)
 		if isinstance(filename, (str, tabletools.pandas.DataFrame)):
 			table = tabletools.Table(filename)
 		else:
@@ -75,7 +81,13 @@ class ConvertTable:
 
 		# Get the relevant columns for the data.
 		column_categories = self.parseTableColumns(table.columns, **kwargs)
-
+		print("Processed Keyword Arguments:")
+		for k, v in kwargs.items():
+			if len(str(v)) < 100:
+				val = v
+			else:
+				val = "{} ({})".format(type(v), "")
+			print("\t", k, "\t", val)
 		json_table = list()
 		print("Converting the table into a compatible json format...")
 		pbar = progressbar.ProgressBar(max_value = len(table))
@@ -171,11 +183,18 @@ class ConvertTable:
 
 		if _series_name_column_keyword:
 			series_name_column = _series_name_column_keyword
+		
 		result['regionCodeColumn'] = region_code_column
 		result['regionNameColumn'] = region_name_column
 		result['seriesCodeColumn'] = series_code_column
 		result['seriesNameColumn'] = series_name_column
 		
+		result['seriesNoteMap'] = kwargs.get('seriesNoteMap')
+		result['seriesTagMap'] = kwargs.get('seriesTagMap')
+		result['seriesDescriptionMap'] = kwargs.get('seriesDescriptionMap')
+		result['seriesScaleMap'] = kwargs.get('seriesScaleMap')
+		result['seriesUnitMap'] = kwargs.get('seriesUnitMap')
+
 		try:
 			assert series_code_column
 			assert series_name_column 
@@ -199,6 +218,7 @@ class ConvertTable:
 			print("Series Scale Column:", series_scale_column)
 			print("Series Description Column: ", series_description_column)
 			raise exception
+		#pprint(result)
 		
 		return result
 
@@ -247,13 +267,13 @@ class ConvertTable:
 			#subject_notes 		= column_classifier['notes'](row, region_code, subject_code)
 			
 			# Retrieve the series unit configuration
-			json_units = self._getUnits(row, region_code, subject_code, column_classifier, kwargs.get('seriesUnitMap'))
+			json_units = self._getUnits(row, region_code, subject_code, column_classifier, column_classifier['seriesUnitMap'])
 			# Retrieve the series scale configuration.
-			series_scale = self._getScale(row, region_code, subject_code, column_classifier, kwargs.get('seriesScaleMap'))
+			series_scale = self._getScale(row, region_code, subject_code, column_classifier, column_classifier.get('seriesScaleMap'))
 			# Retrieve any available tags
-			series_tags = self._getTags(region_code, subject_code, kwargs.get('seriesTagMap'))
+			series_tags = self._getTags(region_code, subject_code, column_classifier.get('seriesTagMap'))
 
-			subject_description = self._getDescription(row, region_code, subject_code, column_classifier, kwargs.get('seriesDescriptionMap'))
+			subject_description = self._getDescription(row, region_code, subject_code, column_classifier, column_classifier.get('seriesDescriptionMap'))
 			# Parse the sereis values.
 			values = self._getValues(row)
 
@@ -331,6 +351,7 @@ class ConvertTable:
 		description_column = column_classifier['seriesDescriptionColumn']
 
 		result = self._genericMap(region_code, subject_code, description_map)
+		#print(result)
 		
 		if result is None and description_column in row.keys():
 			result = row[description_column]
