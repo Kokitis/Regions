@@ -1,7 +1,7 @@
 
 from pony.orm import db_session
 
-from ...data import getDefinition
+from ...utilities import getDefinition
 from ...github import tabletools
 
 

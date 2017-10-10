@@ -1,6 +1,10 @@
-from fuzzywuzzy import process
-from pony.orm import select, db_session
 import re
+
+from pony.orm import db_session, select
+
+from fuzzywuzzy import process
+
+
 @db_session
 def searchRegions(regions, dataset, namespace = 'ISO', subtype = 'iso3'):
 	""" Attempts to match each region name given in `regions` with those present in the database.
@@ -11,10 +15,12 @@ def searchRegions(regions, dataset, namespace = 'ISO', subtype = 'iso3'):
 		dataset: RegionDataset
 			The dataset to search through. Required to load the requested namespace.
 		namespace: str; default 'ISO'
-			The namespace to search through. 
+			The namespace to search through.
+		subtype: str; default 'iso3'
+			Specifies the supgroup of the current namespace to use.
 	"""
 	namespace = dataset.access('get', 'namespace', code = namespace)
-	print(namespace.regex)
+	#print(namespace.regex)
 	regex = re.compile(namespace.regex)
 	#regex = re.compile("(?P<iso3>[A-Z]{3})|(?P<iso2>[A-Z]{2})|(?P<numeric>[0-9]{3})")
 	region_names = select(s.name for s in dataset.Region)
@@ -54,5 +60,3 @@ def searchRegions(regions, dataset, namespace = 'ISO', subtype = 'iso3'):
 		}
 		table.append(line)
 	return table
-
-

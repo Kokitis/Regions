@@ -3,15 +3,13 @@ from ..data.definitions import common
 DATA_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Data')
 DRIVE_FOLDER = os.path.join(os.getenv("USERPROFILE"), "Google Drive", "Data")
 
-def getDefinition(kind, key, available = False):
+def getDefinition(kind, key):
 	"""	Retrieves a pre-defined definition of an entity.
 		Parameters
 		----------
 			kind: {'agency', 'namespace'}
 			key: str
 				The code or name of an entity to retrieve.
-			available: bool; default False
-				Lists all available keys.
 	"""
 	result = None
 

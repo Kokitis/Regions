@@ -8,8 +8,8 @@ import pony
 import progressbar
 
 from .. import entities
-from ..data import getDefinition
-from ..utilities import namespaces, validation
+
+from ..utilities import namespaces, validation, getDefinition
 from ..github import Texttable, timetools
 
 database_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "databases")
@@ -18,7 +18,6 @@ standard_datasets = {
 	'europe': os.path.join(database_folder, "eurostat_database.sqlite"),
 	'global': os.path.join(database_folder, "global_database.sqlite")
 }
-
 
 class RegionDatabase:
 	""" Accesses a database with information concerning various regions.
@@ -355,16 +354,13 @@ class RegionDatabase:
 		return result
 
 
-
 	@pony.orm.db_session
 	def getRegion(self, keys, namespace = None):
 		"""Requests a region based on its name or namespace.
 			Parameters
 			----------
-
 				keys: str, list
 					The code or name of a region.
-
 				namespace: str, Namespace; default None
 					The namespace to search through, if a code is provided.
 					The keys are required to be valid identifiers if the namespace is not given.
@@ -420,7 +416,7 @@ class RegionDatabase:
 
 		_filter = lambda s: (s.code == key or s.name == key) and region in s.region.identifiers
 
-		series = region.series.select(_filter)
+		series = self.select('series', _filter)
 
 		if select_one and len(series) > 0:
 			series = series.first()
@@ -444,6 +440,10 @@ class RegionDatabase:
 						* 'unitCode': str; default None
 						* 'unitString': str
 					* seriesValues: list
+			verbose: bool; default False
+				If True, additional status messages will be displayed
+				when importing series, including which regions could
+				not be updated.
 		"""
 		print("Importing from JSON", flush = True)
 		timer = timetools.Timer()

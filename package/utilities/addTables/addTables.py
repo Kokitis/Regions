@@ -3,7 +3,7 @@
 """
 from functools import partial
 
-from ...data import getDefinition
+from ...utilities import getDefinition
 from ...github import tabletools
 from .._converters import ConvertTable
 from ._world_population_prospects import addWorldPopulationProspects
@@ -183,6 +183,6 @@ def _addWorldDevelopmentIndicators(dataset, filename = None):
 	return None
 
 
-def _defaultMadisonHistoricalTables(dataset):
+def _defaultMadisonHistoricalTables():
 	pass
 

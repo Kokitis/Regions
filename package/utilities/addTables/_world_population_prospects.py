@@ -107,7 +107,7 @@ def _addWorldPopulationProspects2017(dataset):
 		'POP.PROJ.CONST.MORT': "Constant-mortality variant, 2015 - 2100"
 	}
 
-	def _series_desc_map_func_mapper(mapper, region_code, sc):
+	def _series_desc_map_func_mapper(mapper, _, sc):
 		return mapper.get(sc)
 
 	_series_desc_map_func = partial(_series_desc_map_func_mapper, _series_description_map)

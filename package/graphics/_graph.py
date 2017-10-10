@@ -283,19 +283,6 @@ class RegionPlot:
         #self.formatPlot(series)
         return result
 
-class ProjectionPlot(RegionPlot):
-    """ A version of the regionplot specialized for population projections."""
-
-    def addRegion(self, region, report):
-        """ Adds all series for a region from the provided report.
-        """
-
-        all_series = region.getSeries(report)
-
-        highest_series = max(all_series, lambda s: max(s.y))
-        lowest_series  = min([i for i in all_series if i != highest_series], lambda s: min(s.y))
-
-        other_series = [i for i in all_series if (i != highest_series and i != lowest_series)]
 
 
 

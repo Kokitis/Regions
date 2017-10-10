@@ -1,3 +1,4 @@
+from .definitions import getDefinition
 from . import tables
 from . import validation
 from .addTables import addReport

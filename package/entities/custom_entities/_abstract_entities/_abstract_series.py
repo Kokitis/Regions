@@ -11,7 +11,7 @@ class AbstractSeries:
 	entity_type = 'series'
 	_values = None
 	def __call__(self, x, absolute = False, method = 'inner', fill_value = math.nan):
-   		""" Returns the `y` value at `x`. Interpolation is supported.
+		""" Returns the `y` value at `x`. Interpolation is supported.
 			Parameters
 			----------
 			x: int
@@ -88,7 +88,7 @@ class AbstractSeries:
 		return other
 
 	@staticmethod
-	def _apply2DOperation(y, other_y, method):
+	def _apply2DOperation(y, other_y, operation):
 		# Basic operations
 		if operation == '+':
 			new_y = y + other_y
@@ -150,7 +150,7 @@ class AbstractSeries:
 		for x in domain:
 			y = self(x, method = method)
 			other_y = other(x, method = method)
-			new_y = self._apply2DOperation(y, other_y, method)
+			new_y = self._apply2DOperation(y, other_y, operation)
 			result.append((x, new_y))
 
 		result = self.emulate(self, result)

@@ -1,12 +1,12 @@
 from ...github import tabletools
-from ...data import getDefinition
+from ...utilities import getDefinition
 
 def importStateNamespace(dataset):
     identifier_map = dict()
     filename = getDefinition('file', 'State Codes')
 
     usps_agency = getDefinition('agency', 'USPS')
-    usps_agency = dataset.insertEntity('agency', **usps_agency)
+    dataset.insertEntity('agency', **usps_agency)
 
     namespace_config = getDefinition('namespace', 'ST')
     namespace = dataset.insertEnity('namespace', **namespace_config)

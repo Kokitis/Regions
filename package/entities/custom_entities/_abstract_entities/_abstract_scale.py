@@ -1,5 +1,7 @@
 from ....github import numbertools
 
+
+# noinspection PyTypeChecker
 class AbstractScale:
 	def __float__(self):
 		""" Returns a floating-point represenation f 'Scale'

@@ -89,4 +89,4 @@ class Union:
 	""" Allows easy access to various characteristics of unions."""
 
 	def __init__(self, members):
-		pass
+		print(members)
