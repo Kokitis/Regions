@@ -283,6 +283,23 @@ class RegionPlot:
         #self.formatPlot(series)
         return result
 
+    def addProjection(self, template, *projections, **kwargs):
+        """
+        """
+        print("Projections: ")
+        print("\t", projections)
+        r = random.randint(0, 255)
+        g = random.randint(0, 255)
+        b = random.randint(0, 255)
+        _color = "#{:02X}{:02X}{:02X}".format(r, g, b)
 
+        lower, middle, upper = projections#sorted(projections, key = lambda s: s.average())
 
+        self.addSeries(template, color = 'k', linestyle = '-')
+
+        self.addSeries(upper, color = _color, linestyle = '--')
+        self.addSeries(lower, color = _color, linestyle = '--')
+        self.addSeries(middle, color = _color, linestyle = '-')
+        self.ax.fill_between(upper.x, [i*1000 for i in upper.y], [i*1000 for i in lower.y], color = _color, alpha = 0.2)
+        self.formatPlot(template)
 

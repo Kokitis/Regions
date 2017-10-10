@@ -79,7 +79,7 @@ class AbstractSeries:
 			other = self.emulate(self, sorted(other))
 		elif not (hasattr(other, 'entity_type') and other.entity_type == 'series'):
 			try:
-				other = [(i, float(other) for i in self.x)]
+				other = [(i, float(other)) for i in self.x]
 				other = self.emulate(self, sorted(other))
 			except Exception as exception:
 				message = "Invalid type for series operation: value = {}, type = {}".format(other, type(other))

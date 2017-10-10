@@ -53,7 +53,7 @@ class ConvertTable:
 			'series': series_list
 		}
 		
-		self.dataset.importJson(json)
+		self.dataset.addJson(json)
 	#@pony.orm.db_session
 	def importTable(self, filename, **kwargs):
 		""" Imports a spreadsheet into the database.
@@ -100,26 +100,6 @@ class ConvertTable:
 		
 		return json_table
 
-	def importJson(self, data, namespace, report):
-		""" Imports a valid json/dict object into the database.
-
-		:param data:
-		:param namespace:
-		:param report:
-		:return:
-		"""
-		
-		region_code = data['regionCode']
-		region = self.dataset.getRegion(region_code, namespace)
-		
-		#agency = self.dataset.importEntity('agency', agency)
-		#report['agency'] = agency 
-		#report = self.dataset.importEntity('report', report)
-
-		series = data
-		series['region'] = region
-		series['report'] = report 
-		self.dataset.importjson(series)
 
 	def handleRequiredArguments(self, agency, namespace, report):
 		""" Confirms that the three arguments that must be provided are valid.
