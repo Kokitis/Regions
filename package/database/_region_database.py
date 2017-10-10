@@ -520,7 +520,7 @@ class RegionDatabase:
 
 			#pprint(series_json)
 			
-			self.importSeries(series_json)
+			self.addSeries(series_json)
 		print("Imported {} of {} series".format(len(data['series']) - len(skipped), len(data['series'])))
 		db_size = os.path.getsize(self.filename) / 1024**2
 		print("Size of database: {:.2f} MB".format(db_size))

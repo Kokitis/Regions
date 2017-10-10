@@ -10,8 +10,8 @@ class AbstractSeries:
 	"""
 	entity_type = 'series'
 	_values = None
-	def __call__(self, x, absolute = False, interpolate = True):
-		""" Returns the `y` value at `x`. Interpolation is supported.
+	def __call__(self, x, absolute = False, method = 'inner', fill_value = math.nan):
+   		""" Returns the `y` value at `x`. Interpolation is supported.
 			Parameters
 			----------
 			x: int
@@ -19,13 +19,23 @@ class AbstractSeries:
 			absolute: bool; default True
 				If True, the returned y-value will be automatically scaled according
 				to the series.scale value.
-			interpolate: bool; default True
-				If True, y values will be linearly interpolated. Otherwise, nan will be returned. 		
+			method: {'interpolate', 'inner', 'exact'}
+				* 'interpolate': 
+				* 'inner': 
+				* 'exact': 	
+			fill_value: int, float; default math.nan
+				Returned if there is no corresponding `y` for the given `x`
 		"""
 		if not hasattr(self, '_interpolate'):
 			self.setInterpolation()
-		if interpolate:
+		
+		if method == 'extrapolate':
 			value = self._interpolate(x)
+		elif method == 'inner':
+			if min(self.x) <= x <= max(self.x):
+				value = self._interpolate(x)
+			else:
+				value = math.nan
 		else:
 			value = self._interpolate(x) if x in self.x else math.nan
 		value = float(value)
@@ -62,68 +72,85 @@ class AbstractSeries:
 	def __rmul__(self, other):
 		return self.__mul__(other)
 
-	@classmethod
-	def _applyOperation(cls, self, other, operation):
-		#if other == 0: return self
-		if other == 0: return self # sum() tries to add 0 to the objects
 
+	def _convertToParsableFormat(self, other):
+		# Convert 'other' into a parsable format.
 		if isinstance(other, list):
-			other_x, other_y = zip(*sorted(other))
-			other = interp1d(other_x, other_y)
-		elif hasattr(other, 'entity_type') and other.entity_type == 'series':
-			pass
-		else:
+			other = self.emulate(self, sorted(other))
+		elif not (hasattr(other, 'entity_type') and other.entity_type == 'series'):
 			try:
-				_y = float(other)
-				other = lambda s: _y
-			except TypeError as exception:
+				other = [(i, float(other) for i in self.x)]
+				other = self.emulate(self, sorted(other))
+			except Exception as exception:
 				message = "Invalid type for series operation: value = {}, type = {}".format(other, type(other))
 				print(message)
 				raise exception
+		return other
 
+	@staticmethod
+	def _apply2DOperation(y, other_y, method):
+		# Basic operations
+		if operation == '+':
+			new_y = y + other_y
+		elif operation == '-':
+			new_y = y - other_y
+		elif operation == '*':
+			new_y = y * other_y
+		elif operation == '/':
+			new_y = y / other_y
+		
+		# Relational operations
+		elif operation == '==':
+			new_y = y == other_y
+		elif operation == '>=':
+			new_y = y >= other_y
+		elif operation == '>':
+			new_y = y > other_y
+		elif operation == '<':
+			new_y = y < other_y
+		elif operation == '<=':
+			new_y = y <= other_y 
+		elif operation == '!=':
+			new_y = y != other_y
+
+		elif operation == '%':
+			# Relative change
+			new_y = (other_y - y) / y 
+
+		else:
+			message = "Invalid operation: '{}'".format(operation)
+			raise ValueError(message)
+		
+		return new_y
+	
+	@classmethod
+	def _applyOperation(cls, self, other, operation, method = 'interpolate', domain = None):
+		""" The point of entry for comparing/applying operations to this series obj. 
+			Parameters
+			----------
+			cls: The current class of `self`
+			self: 
+			other: number, list, Series
+				The other value set to compare against `self`
+			method: {'interpolate', 'strict', 'inner'}
+			domain: list, tuple
+				The x-values to iterate over. Defalts to `self.x`.
+
+			Returns
+			-------
+			result: Series
+		"""
+		if other == 0: return self # sum() tries to add 0 to the objects
+
+		if domain is None: domain = self.x
+
+		other = self._convertToParsableFormat(other)
 		result = list()
 
-		for x, y in self:
-			other_y = other(x)
-
-			# Basic operations
-			if operation == '+':
-				new_y = y + other_y
-			elif operation == '-':
-				new_y = y - other_y
-			elif operation == '*':
-				new_y = y * other_y
-			elif operation == '/':
-				new_y = y / other_y
-			
-			# Relational operations
-			elif operation == '==':
-				new_y = y == other_y
-			elif operation == '>=':
-				new_y = y >= other_y
-			elif operation == '>':
-				new_y = y > other_y
-			elif operation == '<':
-				new_y = y < other_y
-			elif operation == '<=':
-				new_y = y <= other_y 
-			elif operation == '!=':
-				new_y = y != other_y
-
-			# Scalar operations
-			elif operation == 'abs':
-				new_y = abs(y)
-			elif operation == 'int':
-				new_y = int(y)
-
-			elif operation == '%':
-				# Relative change
-				new_y = (other_y - y) / y 
-
-			else:
-				message = "Invalid operation: '{}'".format(operation)
-				raise ValueError(message)
-
+		for x in domain:
+			y = self(x, method = method)
+			other_y = other(x, method = method)
+			new_y = self._apply2DOperation(y, other_y, method)
 			result.append((x, new_y))
 
 		result = self.emulate(self, result)

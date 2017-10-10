@@ -1,6 +1,6 @@
 from fuzzywuzzy import process
 from pony.orm import select, db_session
-
+import re
 @db_session
 def searchRegions(regions, dataset, namespace = 'ISO', subtype = 'iso3'):
 	""" Attempts to match each region name given in `regions` with those present in the database.

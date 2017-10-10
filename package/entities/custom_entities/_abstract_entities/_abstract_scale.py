@@ -31,7 +31,7 @@ class AbstractScale:
 		return 1.0
 
 	def __str__(self):
-		return "Scale('{}')".format(self.scale)
+		return "Scale('{}')".format(self.string)
 
 	def __call__(self, array, human_readable = False):
 		""" Returns the scaled version of the provided array.
