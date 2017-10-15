@@ -45,11 +45,6 @@ class AbstractSeries:
 		for i in self.values:
 			yield i
 
-	def __abs__(self):
-		return self._applyOperation(self, [], 'abs')
-	def __int__(self):
-		return self._applyOperation(self, [], 'int')
-
 	def __add__(self, other):
 		#print("__add__({},{})".format(self, other))
 		return self._applyOperation(self, other, '+')
@@ -61,11 +56,7 @@ class AbstractSeries:
 		return self._applyOperation(self, other, '/')
 	def __truediv__(self, other):
 		return self._applyOperation(self, other, '/')
-	def __rshift__(self, other):
-		# Ratio, scalled to 100
-		return self._applyOperation(self, other, '>>')
-	def __xor__(self, other):
-		return self._applyOperation(self, other, '^')
+
 	def __radd__(self, other):
 		#print("__radd__({}, {})".format(self, other))
 		return self.__add__(other)
@@ -296,19 +287,19 @@ class AbstractSeries:
 			----------
 				year: int
 					A valid year to base all calculations on.
-				operation: {'ratio', 'difference'}; default 'ratio'
-					* 'difference': Returns the absolute difference between the base year 
+				operation: str; default 'ratio'
+					* '-', 'difference': Returns the absolute difference between the base year 
 						and each other year.
-					* 'ratio': Returns the ratio between the base year and the base year.
+					* '/', 'ratio': Returns the ratio between the base year and the base year.
 
 
 		"""
 		base_value = self(year)
 
-		if operation == 'ratio':
+		if operation == '/':
 			new_series = self / base_value
 
-		elif operation == 'difference':
+		elif operation == '-':
 			new_series = self - base_value
 		else:
 			message = "'{}' is not a valid annual operation type ('ratio', 'difference')"

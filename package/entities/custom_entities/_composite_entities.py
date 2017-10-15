@@ -1,5 +1,5 @@
 import pony
-
+from pprint import pprint
 from ...github import numbertools
 from ._emulator_entities import EmulatorRegion, EmulatorSeries
 
@@ -27,7 +27,7 @@ class CompositeRegion(EmulatorRegion):
 			
 	"""
 	@pony.orm.db_session
-	def __init__(self, regions, report, **kwargs):
+	def __init__(self, regions, report = None, **kwargs):
 		if report is None:
 			message = "Must supply a valid report to load!"
 			raise ValueError(message)
@@ -97,9 +97,10 @@ class CompositeRegion(EmulatorRegion):
 				series: CompositeSeries
 		"""
 
-		if key not in self._series:
-			self._loaded_series[key, report] = self._loadSeries(key, report)
-		return self._loaded_series[key]
+		if key not in self._loaded_series:
+				self._loaded_series[key, report] = self._loadSeries(key, report)
+		#pprint(self._loaded_series)
+		return self._loaded_series[key, report]
 
 
 class CompositeSeries(EmulatorSeries):
@@ -116,11 +117,16 @@ class CompositeSeries(EmulatorSeries):
 		Any valid series arguments. Will overwrite values taken from 'template'
 		template: Series
 			A template series to use. Defaults to the first element of the passed list.
+		
+		Attributes
+		----------
+		members: list<Series>
+			The series used to create the CompositeSeries.
 	"""
-	def __init__(self, series_list, method = 'add', bounds = 'nan', **kwargs):
+	def __init__(self, members, method = '+', bounds = 'nan', **kwargs):
 		""" Parameters
 			----------
-			series_list: list<series>
+			members: list<series>
 				The full list of **Series** objects to combine.
 			method: {'add'}; default 'add'
 				The method to use when combineing the series.
@@ -132,12 +138,13 @@ class CompositeSeries(EmulatorSeries):
 			* 'fill': Values will be interpolated from the closest values. 
 			bounds: Same as `missing`
 		"""
-		template = kwargs.get('template', series_list[0])
+		self.members = members
+		template = kwargs.get('template', self.members[0])
 
 		arguments = self._parseCompositeArguments(template, **kwargs)
 		arguments['region'] = kwargs.get('region')
 
-		self._original, self._values = self._combineSeries(series_list, method)
+		self._original, self._values = self._combineSeries(members, method)
 
 		super().__init__(template, self._values, **arguments)
 		self.setInterpolation(bounds)
@@ -151,18 +158,19 @@ class CompositeSeries(EmulatorSeries):
 		return args
 
 	@staticmethod
-	def _combineSeries(all_series, method):
-		for s in all_series:
-			s.setInterpolation(None)
-		initial_series = EmulatorSeries(all_series[0])
-		other_series = all_series[1:]
-		original_series = [(i.region.name, i) for i in all_series]
+	def _combineSeries(all_series):
 
-		for other in other_series:
-			initial_series = initial_series.compare(other, method)
+		_min_x = min([min(i.x) for i in all_series])
+		_max_x = max([max(i.x) for i in all_series])
+
+		data = list()
+		for year in range(_min_x, _max_x + 1):
+			series_value = sum(i(year, 'inner') for i in all_series)
+			data.append(year, series_value)
 		
+		initial_series = EmulatorSeries(all_series[0], data)
 
-		return original_series, initial_series
+		return initial_series
 
 	def components(self, year):
 		total = self(year)
@@ -180,16 +188,44 @@ class CompositeSeries(EmulatorSeries):
 				year
 			)
 		)
+
 		for member in members:
 			name, value = member 
 			ratio = value / total
 			readable_value = numbertools.humanReadable(value, base = _base)
-			print("{:>10}\t{:>6.2%}\t{}".format(readable_value, ratio, name)) 
+			print("{:>10}\t{:>6.2%}\t{}".format(readable_value, ratio, name))
+	
+	def getComponents(self, method):
+		""" Calculates the contribution for each subseries for the given year.
+			Returns
+			-------
+				contributions: list<dict<>>
+				* identifiers: list of the region identifiers
+				* components: list of tuples -> (year, value, percent)
+
+		"""
+		components = list()
+		for member in self.members:
+			region_identifiers = member.region.identifiers 
+			data = list()
+
+			for year, value in self:
+				other_value = member(year)
+				ratio = other_value / value 
+				data.append((year, other_value, value))
+
+			element = {
+				'identifiers': region_identifiers,
+				'components': data
+			}
+			components.append(element)
+		return components
+
 	@staticmethod
 	def emulate(template, values, **kwargs):
 
 		return EmulatorSeries(template, values, **kwargs)
 
-def toTable(self):
-	result = [t for s in self._original for t in s.toTable()]
-	return result
+	def toTable(self):
+		result = [t for s in self._original for t in s.toTable()]
+		return result
