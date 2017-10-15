@@ -353,24 +353,6 @@ class AbstractSeries:
 		"""
 		return None
 
-	def compare(self, other, operation):
-		""" Compares this series to another.
-			Parameters
-			----------
-				other: Series
-				operation: {'/', '-', 'ratio', 'difference'}
-		"""
-
-		if operation in {'-', 'difference'}:
-			result = self - other
-		elif operation in {'/', 'ratio'}:
-			result = other / self
-		elif operation in {'+', 'add'}:
-			result = self + other
-		else:
-			message = "Invalid operation: '{}'".format(operation)
-			raise ValueError(message)
-		return result
 
 	def toTable(self):
 		""" Converts the series to a dict, where each attribute becomes a dict key """
