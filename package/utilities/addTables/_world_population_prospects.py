@@ -1,10 +1,11 @@
-import pandas
-
 from functools import partial
 
-from ..definitions import getDefinition
+import pandas
+
 from ...github import tabletools
 from .._converters import ConvertTable
+from ..definitions import getDefinition
+
 
 def addWorldPopulationProspects(dataset, variant = 2017):
 	variant = str(variant)
@@ -166,4 +167,3 @@ def _addWorldPopulationProspects2015(dataset):
 
 	ConvertTable(dataset, full_table, report = report, **configuration)
 	return None
-

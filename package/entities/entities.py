@@ -8,8 +8,8 @@ def importDatabaseEntities(db):
 	""" Defines the structure of the database.
 		Parameters
 		----------
-			db: pony.orm.Database 
-				The database object to insert the entities into.
+		db: pony.orm.Database 
+			The database object to insert the entities into.
 	"""
 
 	class Region(db.Entity, AbstractRegion):
@@ -141,4 +141,18 @@ def importDatabaseEntities(db):
 		multiplier 	= Optional(float)
 		entity_type = 'scale'
 
-	return Agency, Identifier, Namespace, Observation, Region, Report, Series, Tag, Unit, Scale
+	_entities = {
+		'agency': Agency,
+		'identifier': Identifier,
+		'namespace': Namespace,
+		'observation': Observation,
+		'region': Region,
+		'report': Report,
+		'series': Series,
+		'tag': Tag,
+		'unit': Unit,
+		'scale': Scale
+	}
+
+	#return Agency, Identifier, Namespace, Observation, Region, Report, Series, Tag, Unit, Scale
+	return _entities

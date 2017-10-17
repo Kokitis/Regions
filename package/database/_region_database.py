@@ -83,22 +83,23 @@ class RegionDatabase:
 		if filename in standard_datasets:
 			filename = standard_datasets[filename]
 		self.filename = filename
+		print("Database Filename: ", self.filename)
 
 		_database = pony.orm.Database()
 		_entities = entities.importDatabaseEntities(_database)
 
-		Agency, Identifier, Namespace, Observation, Region, Report, Series, Tag, Unit, Scale = _entities
+		#Agency, Identifier, Namespace, Observation, Region, Report, Series, Tag, Unit, Scale = _entities
 
-		self.Agency 	= Agency
-		self.Identifier = Identifier
-		self.Namespace 	= Namespace
-		self.Observation= Observation
-		self.Region 	= Region
-		self.Report 	= Report
-		self.Series 	= Series
-		self.Tag 		= Tag
-		self.Unit 		= Unit
-		self.Scale 		= Scale
+		self.Agency 	= _entities['agency']
+		self.Identifier = _entities['identifier']
+		self.Namespace 	= _entities['namespace']
+		#self.Observation= _entities['observation']
+		self.Region 	= _entities['region']
+		self.Report 	= _entities['report']
+		self.Series 	= _entities['series']
+		self.Tag 		= _entities['tag']
+		self.Unit 		= _entities['unit']
+		self.Scale 		= _entities['scale']
 
 		_database.bind("sqlite", filename, create_db = create) #create_tables
 		_database.generate_mapping(create_tables = create)
@@ -359,14 +360,14 @@ class RegionDatabase:
 		"""Requests a region based on its name or namespace.
 			Parameters
 			----------
-				keys: str, list
-					The code or name of a region.
-				namespace: str, Namespace; default None
-					The namespace to search through, if a code is provided.
-					The keys are required to be valid identifiers if the namespace is not given.
+			keys: str, list
+				The code or name of a region.
+			namespace: str, Namespace; default None
+				The namespace to search through, if a code is provided.
+				The keys are required to be valid identifiers if the namespace is not given.
 			Returns
 			-------
-				region: Region; default None
+			region: Region; default None
 		"""
 		if not isinstance(keys, (list,tuple,set)):
 			keys = [keys]

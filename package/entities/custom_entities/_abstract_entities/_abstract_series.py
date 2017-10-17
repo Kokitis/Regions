@@ -139,12 +139,18 @@ class AbstractSeries:
 		result = list()
 
 		for x in domain:
-			y = self(x, method = method)
-			other_y = other(x, method = method)
+			y = self(x, method = method, absolute = True)
+			other_y = other(x, method = method, absolute = True)
 			new_y = self._apply2DOperation(y, other_y, operation)
 			result.append((x, new_y))
+		configuration = dict()
+		if operation in {'/'}:
+			configuration['scale'] = None
+		else:
+			configuration['scale'] = self.scale
+		
 
-		result = self.emulate(self, result)
+		result = self.emulate(self, result, **configuration)
 
 		return result
 	

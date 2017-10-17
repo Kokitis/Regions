@@ -29,10 +29,8 @@ class RegionPlot:
 
         if len(other) > 0:
             self._plotSeries(other, **kwargs)
-            #self.formatPlot(other[0])
+            self.formatPlot(other[0])
         
-
-
     def formatPlot(self, template):
         if not self._is_formatted:
             self._setPlotOrigins()
@@ -63,7 +61,7 @@ class RegionPlot:
         left = template.report.name
         right = template.report.agency.name
         
-        _padding = 200 - (len(left) - len(right))
+        _padding = 200 - (len(left) - len(right)) + 30
         signature_text = "{}{}{}".format(left, " " * _padding, right)
         
         #x_pos = [i.x for i in template]
@@ -271,12 +269,14 @@ class RegionPlot:
         kwargs['alpha'] = _alpha
 
 
-
+        """
         print("Manualy setting y")
         if max(series.y) >1000000:
             series_y = series.y
         else:
             series_y = [i*1000 for i in series.y]
+        """
+        series_y = series.y
         result = self.ax.plot(series.x, series_y, **kwargs)
         #result = self.ax.scatter(series.x, series.y, color = kwargs['color'])
 

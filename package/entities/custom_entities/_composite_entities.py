@@ -144,7 +144,7 @@ class CompositeSeries(EmulatorSeries):
 		arguments = self._parseCompositeArguments(template, **kwargs)
 		arguments['region'] = kwargs.get('region')
 
-		self._original, self._values = self._combineSeries(members, method)
+		self._values = self._combineSeries(members, method)
 
 		super().__init__(template, self._values, **arguments)
 		self.setInterpolation(bounds)
@@ -158,7 +158,7 @@ class CompositeSeries(EmulatorSeries):
 		return args
 
 	@staticmethod
-	def _combineSeries(all_series):
+	def _combineSeries(all_series, method):
 
 		_min_x = min([min(i.x) for i in all_series])
 		_max_x = max([max(i.x) for i in all_series])
@@ -166,11 +166,11 @@ class CompositeSeries(EmulatorSeries):
 		data = list()
 		for year in range(_min_x, _max_x + 1):
 			series_value = sum(i(year, 'inner') for i in all_series)
-			data.append(year, series_value)
+			data.append((year, series_value))
 		
-		initial_series = EmulatorSeries(all_series[0], data)
+		#initial_series = EmulatorSeries(all_series[0], data)
 
-		return initial_series
+		return  data
 
 	def components(self, year):
 		total = self(year)
@@ -227,5 +227,5 @@ class CompositeSeries(EmulatorSeries):
 		return EmulatorSeries(template, values, **kwargs)
 
 	def toTable(self):
-		result = [t for s in self._original for t in s.toTable()]
+		result = [t for s in self.members for t in s.toTable()]
 		return result

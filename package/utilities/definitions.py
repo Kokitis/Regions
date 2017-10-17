@@ -1,7 +1,7 @@
 import os
 from ..data.definitions import common
-DATA_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Data')
-DRIVE_FOLDER = os.path.join(os.getenv("USERPROFILE"), "Google Drive", "Data")
+DATA_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Region Data')
+DRIVE_FOLDER = os.path.join(os.getenv("USERPROFILE"), "Google Drive", "Region Data")
 
 def getDefinition(kind, key):
 	"""	Retrieves a pre-defined definition of an entity.

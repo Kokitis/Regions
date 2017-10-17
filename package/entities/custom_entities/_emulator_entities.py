@@ -148,19 +148,8 @@ class EmulatorSeries(AbstractSeries):
 
 		else:
 			result = dict()
-			"""
-			code = kwargs.get('code')
-			name = kwargs.get('name')
-			report=kwargs.get('report')
-			region=kwargs.get('region')
 
-			notes = kwargs.get('notes')
-			units = kwargs.get('units')
-			scale = kwargs.get('scale')
-			tags = kwargs.get('tags', [])
-			"""
 		result = {**result, **kwargs}
-
 
 		return result
 	
