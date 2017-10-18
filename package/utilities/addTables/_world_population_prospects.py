@@ -65,8 +65,7 @@ def _addWorldPopulationProspects2017(dataset):
 	print("Combining table...")
 	full_table = pandas.concat(table_dict.values())
 
-	_series_scale_map = lambda *s: 'Thousand'
-	_series_unit_map = lambda *s: 'Persons'
+
 
 	_series_description_map = {
 		'POP.PROJ.MID':
@@ -110,7 +109,8 @@ def _addWorldPopulationProspects2017(dataset):
 
 	def _series_desc_map_func_mapper(mapper, _, sc):
 		return mapper.get(sc)
-
+	_series_scale_map = lambda *s: 'Thousand'
+	_series_unit_map = lambda *s: 'Persons'
 	_series_desc_map_func = partial(_series_desc_map_func_mapper, _series_description_map)
 
 	report = {
@@ -131,9 +131,9 @@ def _addWorldPopulationProspects2017(dataset):
 
 		'namespace': 'ISO',
 
-		'unitMap': _series_unit_map,
-		'scaleMap': _series_scale_map,
-		'descriptionMap': _series_desc_map_func
+		'seriesUnitMap': _series_unit_map,
+		'seriesScaleMap': _series_scale_map,
+		'seriesDescriptionMap': _series_desc_map_func
 	}
 
 	ConvertTable(dataset, full_table, report = report, **configuration)

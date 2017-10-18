@@ -125,7 +125,7 @@ class RegionDatabase:
 			result = entity_class(**kwargs)
 		except Exception as exception:
 			print("Exception: ", str(exception))
-			print("Arguments passed to class: ")
+			print("Arguments passed to class ('{}'): ".format(entity_class))
 			for k, v in sorted(kwargs.items()):
 				print("\t{}:\t{}".format(k, v))
 			message = "Entity creation failed due to incorrect arguments ({})".format(str(exception))
@@ -497,7 +497,7 @@ class RegionDatabase:
 			if units is not None:
 				units = self.access('import', 'unit', units)
 
-			series_description = row.get('seriesDescription')
+			series_description = row['seriesDescription']
 			series_tags = row['seriesTags']
 			if series_tags is None:
 				series_tags = []
@@ -510,7 +510,7 @@ class RegionDatabase:
 				'name': row['seriesName'],
 				'unit': units,
 				'tags': series_tags,
-				'values': row['values']
+				'values': row['values'],
 			}
 			
 			if scale is not None:
@@ -518,6 +518,7 @@ class RegionDatabase:
 
 			if isinstance(series_description, str): #checks if None or nan
 				series_json['description'] = series_description
+
 
 			#pprint(series_json)
 			
@@ -551,10 +552,11 @@ class RegionDatabase:
 				* 'units': Units
 				* 'scale': Scale
 				* 'values': list of x-y value pairs.
+				* 'description': str
 		"""
-
+		#pprint(series)
 		series = validation.parseEntityArguments('series', series)
-
+		
 		series_values = series.pop('values')
 
 		if series['region'] is None:

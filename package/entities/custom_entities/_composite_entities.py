@@ -57,15 +57,15 @@ class CompositeRegion(EmulatorRegion):
 				region = element.region
 			else:
 				region = element
-			print(report,'\t',region)
+			#sprint(report,'\t',region)
 			for series in region.series.select(lambda s: s.report.name == report or s.report.code == report):
-				print("ABC")
+
 				key = "{}|{}".format(str(series.report), series.code)
 				if key not in _series:
 					_series[key] = list()
 				_series[key].append(series)
 		
-		_series = {k: CompositeSeries(s) for k, s in _series.items()}
+		_series = {k: CompositeSeries(s, region = self) for k, s in _series.items()}
 		return _series
 
 
@@ -138,27 +138,22 @@ class CompositeSeries(EmulatorSeries):
 			* 'fill': Values will be interpolated from the closest values. 
 			bounds: Same as `missing`
 		"""
-		self.members = members
+		self.members = [i for i in members if i]
 		template = kwargs.get('template', self.members[0])
-
-		arguments = self._parseCompositeArguments(template, **kwargs)
-		arguments['region'] = kwargs.get('region')
+		
+		#print("Template: ", template)
+		#arguments = self._parseAttributes(template, **kwargs)
+		#arguments['region'] = kwargs.get('region')
 
 		self._values = self._combineSeries(members, method)
-
-		super().__init__(template, self._values, **arguments)
+		#pprint(arguments)
+		super().__init__(template, self._values, **kwargs)
 		self.setInterpolation(bounds)
 
-	def _parseCompositeArguments(self, template, **kwargs):
-
-		args = self._parseAttributes(template)
-		args.pop('region')
-
-		args = {**args, **kwargs}
-		return args
 
 	@staticmethod
 	def _combineSeries(all_series, method):
+		all_series = [i for i in all_series if i is not None]
 
 		_min_x = min([min(i.x) for i in all_series])
 		_max_x = max([max(i.x) for i in all_series])

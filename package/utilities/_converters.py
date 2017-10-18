@@ -97,7 +97,7 @@ class ConvertTable:
 			parsed_row = self.convertRow(row, column_categories, **kwargs)
 			if parsed_row:
 				json_table.append(parsed_row)
-		
+
 		return json_table
 
 
@@ -255,6 +255,7 @@ class ConvertTable:
 
 			subject_description = self._getDescription(row, region_code, subject_code, column_classifier, column_classifier.get('seriesDescriptionMap'))
 			# Parse the sereis values.
+			#print(subject_description)
 			values = self._getValues(row)
 
 			json_series = {
@@ -291,12 +292,19 @@ class ConvertTable:
 		if result is None and unit_string_column in row.keys():
 			unit_string = row[unit_string_column]
 			unit_code = row.get(unit_code_column)
+		else:
+			if isinstance(result, str):
+				unit_string = result 
+				unit_code = None 
+			else:
+				unit_string = result['unitString']
+				unit_code = result['unitCode']
 
-			result = {
-				'unitString': unit_string
-			}
-			if isinstance(unit_code, str):
-				result['unitCode'] = unit_code
+		result = {
+			'unitString': unit_string
+		}
+		if isinstance(unit_code, str):
+			result['unitCode'] = unit_code
 
 
 		return result

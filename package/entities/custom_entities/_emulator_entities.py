@@ -1,5 +1,5 @@
 from ._abstract_entities import AbstractRegion, AbstractSeries
-
+from pprint import pprint
 class EmulatorRegion(AbstractRegion):
 	""" Defines a class that should operate as a drop-in replacement
 		for any other Region entity. 
@@ -101,10 +101,10 @@ class EmulatorSeries(AbstractSeries):
 		self._report = _input_arguments['report']
 		self._region = _input_arguments['region']
 		self._name 	 = _input_arguments['name']
-		self._tags = _input_arguments['tags']
-		self._notes = _input_arguments['notes']
-		self._unit = _input_arguments['units']
-		self._scale = _input_arguments['scale']
+		self._tags 	 = _input_arguments['tags']
+		self._notes  = _input_arguments['notes']
+		self._unit 	 = _input_arguments['units']
+		self._scale  = _input_arguments['scale']
 
 		self._values = self._parseInputValues(values)
 
@@ -120,7 +120,7 @@ class EmulatorSeries(AbstractSeries):
 			each attribute related to this series.
 
 		"""
-		if template:
+		if template is not None:
 			code 	= template.code 
 			name 	= template.name 
 
@@ -150,7 +150,6 @@ class EmulatorSeries(AbstractSeries):
 			result = dict()
 
 		result = {**result, **kwargs}
-
 		return result
 	
 	@staticmethod
