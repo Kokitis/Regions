@@ -1,8 +1,20 @@
 import math
 import random
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+from ..github import numbertools
 
 class RegionPlot:
+    """ Plots and formats a graph using the given series.
+        Parameters
+        ----------
+
+        Keyword Arguments
+        -----------------
+        domain: pair of x values
+            Sets the x-axis range
+        
+    """
     def __init__(self, *other, **kwargs):
 
 
@@ -30,7 +42,14 @@ class RegionPlot:
         if len(other) > 0:
             self._plotSeries(other, **kwargs)
             self.formatPlot(other[0])
-        
+
+    def plotOption(self, key, value = None):
+        if value:
+            self._format_options[key] = value 
+        else:
+            value = self._format_options.get(key)
+        return value
+
     def formatPlot(self, template):
         if not self._is_formatted:
             self._setPlotOrigins()
@@ -64,11 +83,6 @@ class RegionPlot:
         _padding = 200 - (len(left) - len(right)) + 30
         signature_text = "{}{}{}".format(left, " " * _padding, right)
         
-        #x_pos = [i.x for i in template]
-        #y_pos = [i.y for i in template]
-        #x_bounds = min(x_pos) - 3.5
-        #y_bounds = -500
-        #_color_cast = lambda s: "{:>02X}".format(int(255 * s))
         x_bounds = -0.05
         y_bounds = -0.1
         if kind == 'transparent':
@@ -112,6 +126,8 @@ class RegionPlot:
     
     def _createPlot(self):
         fig, ax = plt.subplots(figsize = self._format_options['figsize'])
+        majorformatter = FuncFormatter(lambda a, b: numbertools.humanReadable(a))
+        ax.yaxis.set_major_formatter(majorformatter)
         #ax.tick_params(axis = 'both', which = 'major', labelsize = 18)
         return fig, ax
     def _generateLegend(self):
@@ -218,7 +234,6 @@ class RegionPlot:
             self.addSeries(other_series, **kwargs)
         
         self.ax.legend()
-
         
     
     def addSeries(self, series, **kwargs):
@@ -226,9 +241,9 @@ class RegionPlot:
 
             Parameters
             ----------
-                series: Series
-                    The series to plot. The colors, style, transparency,
-                    and label will be added automatically.
+            series: Series
+                The series to plot. The colors, style, transparency,
+                and label will be added automatically.
             
             Keyword Arguments
             -----------------
@@ -238,19 +253,23 @@ class RegionPlot:
             label
             
         """
-       # _current_label = "{} {}".format(series.region.name, series.code)
-        #_current_label = series.region.name
-        _min_x = self._format_options['xMin']
-        _max_x = self._format_options['xMax']
+
+        _min_x = self.plotOption('xMin')
+        _max_x = self.plotOption('xMax')
 
         _min_x = min(series.x) if _min_x is None else min(_min_x, min(series.x))
         _max_x = max(series.x) if _max_x is None else max(_max_x, max(series.x))
 
-        self._format_options['xMin'] = _min_x
-        self._format_options['xMax'] = _max_x
+        self.plotOption('xMin', _min_x)
+        self.plotOption('xMax', _max_x)
 
+        kwargs = self._configureSeriesOptions(series, **kwargs)
 
-        #kwargs['label'] = kwargs.get('label', _current_label)
+        result = self.ax.plot(series.x, series.y, **kwargs)
+
+        return result
+
+    def _configureSeriesOptions(self, series, **kwargs):
         _color = kwargs.get('color')
         _style = kwargs.get('style', kwargs.get('linestyle'))
         _alpha = kwargs.get('alpha')
@@ -267,21 +286,7 @@ class RegionPlot:
         kwargs['color'] = _color
         kwargs['linestyle'] = _style 
         kwargs['alpha'] = _alpha
-
-
-        """
-        print("Manualy setting y")
-        if max(series.y) >1000000:
-            series_y = series.y
-        else:
-            series_y = [i*1000 for i in series.y]
-        """
-        series_y = series.y
-        result = self.ax.plot(series.x, series_y, **kwargs)
-        #result = self.ax.scatter(series.x, series.y, color = kwargs['color'])
-
-        #self.formatPlot(series)
-        return result
+        return kwargs
 
     def addProjection(self, template, *projections, **kwargs):
         """
