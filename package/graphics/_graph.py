@@ -25,7 +25,8 @@ class RegionPlot:
             'xLabel': 'N/A',
             'yMin': None,
             'yMax': None,
-            'reference': 0.0, # Point to consider as the reference point. Ex. 100 for ratios
+            'xReference': 2017, # Point to consider as the reference point. Ex. 100 for ratios
+            'yReference': 0.0,
             'plotStyle': 'fivethirtyeight'
         }
 
@@ -54,7 +55,6 @@ class RegionPlot:
         if not self._is_formatted:
             self._setPlotOrigins()
             self._addPlotLabels(template)
-            #self._formatTickLabels(self.ax.get_xticklabels())
             self._addSignature(template)
             self._generateLegend()
             self._is_formatted = True
@@ -116,12 +116,13 @@ class RegionPlot:
     def _setPlotOrigins(self):
         
         # Generate a bolded horizontal line at y = 0 
-        reference_line = self._format_options['reference']
+        x_reference_line = self._format_options['xReference']
+        y_reference_line = self._format_options['yReference']
         minimum_x = self._format_options['xMin']
         maximum_x = self._format_options['xMax']
 
-        self.ax.axhline(y = reference_line, color = 'black', linewidth = 1.3, alpha = .7)
-
+        self.ax.axvline(x = x_reference_line, color = 'black', linewidth = 1.3, alpha = .4)
+        self.ax.axhline(y = y_reference_line, color = 'black', linewidth = 1.3, alpha = .4)
         self.ax.set_xlim(left = minimum_x - 1, right = maximum_x + 1)
     
     def _createPlot(self):
@@ -191,23 +192,6 @@ class RegionPlot:
             style = _default_styles[index%len(_default_styles)]
             self._stylemap[string] = style
         return style
-
-    @staticmethod
-    def _formatTickLabels(labels):
-        
-        float_labels = list()
-        for l in labels:
-            try:
-                n = float(l.get_text())
-                float_labels.append(n)
-            except Exception as exception:
-                message = "Should add a specific class of exception"
-                print(message)
-                raise exception
-        magnitude = max(float_labels)
-
-        magnitude = math.pow(10, int(math.log10(magnitude)))
-        return magnitude
         
     
     def _addPlotLabels(self, template):
