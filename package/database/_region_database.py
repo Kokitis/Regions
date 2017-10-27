@@ -402,7 +402,7 @@ class RegionDatabase:
 		for key in keys:
 			yield self.getRegion(key, namespace)
 
-
+	@pony.orm.db_session
 	def getSeries(self, region, key, select_one = True):
 		"""	Retrieves a specific series for a given region.
 			Parameters

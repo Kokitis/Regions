@@ -394,3 +394,4 @@ class AbstractSeries:
 
 	def average(self):
 		return sum(self.y) / len(self.x)
+
