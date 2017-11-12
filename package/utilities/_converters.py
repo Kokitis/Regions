@@ -2,7 +2,7 @@ import progressbar
 
 from . import tables, validation
 from ..github import tabletools
-
+from pprint import pprint
 
 class ConvertTable:
 	""" Designed to parse a spreadsheet and import it into the database.
@@ -284,6 +284,7 @@ class ConvertTable:
 			column_classifier: dict
 			unit_map:dict, None
 		"""
+
 		unit_code_column = column_classifier['seriesUnitCodeColumn']
 		unit_string_column = column_classifier['seriesUnitNameColumn']
 
@@ -292,13 +293,16 @@ class ConvertTable:
 		if result is None and unit_string_column in row.keys():
 			unit_string = row[unit_string_column]
 			unit_code = row.get(unit_code_column)
+		elif isinstance(result, str):
+			unit_string = result 
+			unit_code = None
 		else:
-			if isinstance(result, str):
-				unit_string = result 
-				unit_code = None 
-			else:
+			try:
 				unit_string = result['unitString']
 				unit_code = result['unitCode']
+			except TypeError:
+				unit_string = ""
+				unit_code = ""
 
 		result = {
 			'unitString': unit_string

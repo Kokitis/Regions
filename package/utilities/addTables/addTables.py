@@ -2,11 +2,13 @@
 	the World Economic Outlook and Word Development Indicators
 """
 from functools import partial
-
+from progressbar import ProgressBar
 from ...utilities import getDefinition
 from ...github import tabletools
 from .._converters import ConvertTable
 from ._world_population_prospects import addWorldPopulationProspects
+import re
+
 def addReport(dataset, string, *args):
 	""" Adds the selected report to the dataset. """
 
@@ -114,21 +116,37 @@ def _addWorldDevelopmentIndicators(dataset, filename = None):
 	print("Preparing to import the World Development Indicators...")
 	if filename is None:
 		filename = getDefinition('file', 'World Development Indicators')
-	print("Loading data table...")
+	print("Loading data from ", filename)
 	
 	data_sheet = tabletools.Table(filename, sheetname = 'Data')
 	
 	print("Loading notes sheet...")
 	notes_sheet = tabletools.Table(filename, sheetname = 'Country-Series')
 
-	print("Loading sereis sheet...")
+	print("Loading series sheet...")
 	series_sheet = tabletools.Table(filename, sheetname = 'Series')
 
 	_series_description_map = dict()
 	_series_tag_map = dict()
-	print("Parsing series metadata...")
-	for row in series_sheet:
+
+	def _getWDIUnits(string):
+		
+		#string = [i.strip() for i in string.split('\n')]
+		regex = re.compile("\(([^)]+)\)$")
+		match = regex.search(string)
+		if match:
+			return match.groups()[0]
+		else: return ""
+
+	_series_unit_map = dict()
+	
+	print("Parsing metadata...")
+
+	_progressbar = ProgressBar(max_value = len(series_sheet))
+	for index, row in enumerate(series_sheet):
+		_progressbar.update(index)
 		subject_code = row['Series Code']
+		subject_name = row['Indicator Name']
 
 		definition = row['Long definition']
 		limitations=row['Limitations and exceptions']
@@ -136,6 +154,7 @@ def _addWorldDevelopmentIndicators(dataset, filename = None):
 		relevance = row['Development relevance']
 
 		_series_description_map[subject_code] = definition
+		_unit = _getWDIUnits(subject_name)
 		_tags = [
 			#("Definition", str(definition)),
 			("Limitations", str(limitations)),
@@ -144,15 +163,20 @@ def _addWorldDevelopmentIndicators(dataset, filename = None):
 		]
 		_tags = ['|'.join(i) for i in _tags]
 		_series_tag_map[subject_code] = _tags
+		_series_unit_map[subject_code] = _unit
 
 	def _series_tag_map_func_mapper(mapper, rc, sc):
 		return mapper.get(sc)
 
 	_series_tag_map_func = partial(_series_tag_map_func_mapper, _series_tag_map)
 	_series_description_map_func = partial(_series_tag_map_func_mapper, _series_description_map)
+
+
 	series_notes_map = dict()
 	print("Parsings notes sheet...")
-	for row in notes_sheet:
+	_progressbar = ProgressBar(max_value = len(notes_sheet))
+	for index, row in enumerate(notes_sheet):
+		_progressbar.update(index)
 		region_code = row['CountryCode']
 		subject_code = row['SeriesCode']
 		string = row['DESCRIPTION']
@@ -176,7 +200,8 @@ def _addWorldDevelopmentIndicators(dataset, filename = None):
 		'whitelist': whitelist,
 		'seriesNotesMap': series_notes_map,
 		'seriesDescriptionMap': _series_description_map_func,
-		'seriesTagMap': _series_tag_map_func
+		'seriesTagMap': _series_tag_map_func,
+		'seriesUnitMap': _series_unit_map
 	}
 
 	ConvertTable(dataset, data_sheet, namespace = 'ISO', report = report, **configuration)
