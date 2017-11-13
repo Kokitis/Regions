@@ -19,12 +19,7 @@ standard_datasets = {
 	'global': os.path.join(database_folder, "global_database.sqlite")
 }
 
-class RegionDatabase:
-	""" Accesses a database with information concerning various regions.
-	"""
-	###########################
-	# 
-	###########################
+class CoreDatabase:
 	def __init__(self, filename, create = False):
 		"""
 			Parameters
@@ -34,11 +29,6 @@ class RegionDatabase:
 		"""
 		self.create = create
 		self._main_database = self._initializeDatabase(filename, create)
-
-	##########################
-	#    Private Methods     #
-	##########################
-
 	def _getEntityClass(self, entity):
 		""" Matches an entity string to the corresponding class.
 			Parameters
@@ -58,8 +48,6 @@ class RegionDatabase:
 			_class = self.Identifier
 		elif entity == 'namespace':
 			_class = self.Namespace
-		elif entity == 'observation':
-			_class = self.Observation
 		elif entity == 'region':
 			_class = self.Region
 		elif entity == 'report':
@@ -78,11 +66,11 @@ class RegionDatabase:
 
 		return _class
 
-	def _initializeDatabase(self, filename, create):
+	def _initializeDatabase(self, _filename, create):
 
-		if filename in standard_datasets:
-			filename = standard_datasets[filename]
-		self.filename = filename
+		if _filename in standard_datasets:
+			_filename = standard_datasets[filename]
+		self.filename = _filename
 		print("Database Filename: ", self.filename)
 
 		_database = pony.orm.Database()
@@ -101,13 +89,13 @@ class RegionDatabase:
 		self.Unit 		= _entities['unit']
 		self.Scale 		= _entities['scale']
 
-		_database.bind("sqlite", filename, create_db = create) #create_tables
+		_database.bind("sqlite", self.filename, create_db = create) #create_tables
 		_database.generate_mapping(create_tables = create)
 
 		return _database
 
 	@pony.orm.db_session
-	def _insertEntity(self, entity_class, **kwargs):
+	def _insertEntity(self, entity_type, **kwargs):
 		""" Inserts an entity into the database. Assumes valid data was passed.
 			Parameters
 			----------
@@ -120,7 +108,7 @@ class RegionDatabase:
 			message = "The database must be initialized with the 'create' keyword set to True."
 			print(message)
 			return None
-
+		entity_class = self._getEntityClass(entity_type)
 		try:
 			result = entity_class(**kwargs)
 		except Exception as exception:
@@ -132,74 +120,51 @@ class RegionDatabase:
 			raise ValueError(message)
 		return result
 
+
+	def select(self, entity_type, expression):
+		entity_class = self._getEntityClass(entity_type)
+		result = entity_class.select(expression)
+		return result
+
+	def get(self, entity_type, **kwargs):
+		entity_class = self._getEntityClass(entity_type)
+		try:
+			result = entity_class.get(**kwargs)
+		except TypeError:
+			#The entity class doesn't have one of the attribute keys passed in kwargs
+			result = None
+		return result
+
+
+
+class RegionDatabase(CoreDatabase):
+	""" Accesses a database with information concerning various regions.
+	"""
+
+	##########################
+	#    Private Methods     #
+	##########################
 	
-	@staticmethod
-	def _searchByString(entity_class, string, search_field = 'all'):
+	def _searchByString(self, entity_type, string):
 		"""
 			Searches for an entity based on a single key string.
 			Parameters
 			----------
-			entity_class: string, Entity
+			entity_type: string
 				The entity type to search through
 			string: str
 				The key to search for.
-			search_field: {'all', 'code', 'name', 'value'}; default 'all'
-				A specific class field to search through. If not provided,
-				Will search through a number of fields based on the entity type.
 			Returns
 			-------
 				result: Entity, None
 		"""
-		# For readability and shorter code.
 
-		_checkFields = lambda r, l: r is None and search_field in {'all', l} and hasattr(entity_class, l)
-
-		if string is None:
-			return None
-		elif _checkFields(None, 'code'):
-			result = entity_class.get(code=string)
+		for key in ['code', 'name', 'string']:
+			result = self.get(entity_type, **{key: string})
+			if result is not None:
+				break
 		else:
 			result = None
-
-		if _checkFields(result, 'name'):
-			result = entity_class.get(name=string)
-
-		if _checkFields(result, 'string'):
-			result = entity_class.get(string=string)
-
-		return result
-
-	def _searchByKeywords(self, entity_class, **kwargs):
-		"""
-			Searches for a match between the identifying features in a dict
-			and the entities in the database.
-			Parameters
-			----------
-				entity_class: str, Entity
-					A valid entity class or identifier
-				keywords: dict<{'code', 'name', 'value', 'namespace'}:scalar>
-					One or more keywords that identify a single entity in the dataset.
-					if searching for a region, namespace must be provided.
-		"""
-		if isinstance(entity_class, str):
-			entity_type = entity_class
-		else:
-			entity_type = entity_class.entity_type
-		data = validation.parseEntityArguments(entity_type, kwargs)
-
-		entity_code = data.get('code')
-		entity_name = data.get('name')
-		entity_string = data.get('string')
-
-
-		result = self._searchByString(entity_class, entity_code, 'code')
-
-		if result is None and hasattr(entity_class, 'name'):
-			result = self._searchByString(entity_class, entity_name, 'name')
-
-		if result is None and entity_string is not None and hasattr(entity_class, 'string'):
-			result = self._searchByString(entity_class, entity_string, 'string')
-
 		return result
 	
 	@staticmethod
@@ -261,7 +226,7 @@ class RegionDatabase:
 
 		"""
 
-		entity_class = self._getEntityClass(entity_type)
+		#entity_class = self._getEntityClass(entity_type)
 
 		arguments = self._validateEntityArguments(entity_type, data, **kwargs)
 
@@ -269,18 +234,18 @@ class RegionDatabase:
 			return data #Data is an entity object
 
 		if method in {'get', 'retrieve'}:
-			result = self.get(entity_class, **arguments)
+			result = self.get(entity_type, **arguments)
 
 		elif method in {'add', 'import', 'search'}:
 			if isinstance(data, str):
-				result = self._searchByString(entity_class, data)
+				result = self._searchByString(entity_type, data)
 			else:
-				result = self._searchByKeywords(entity_class,**arguments)
+				result = self.get(entity_type, **arguments)
 		else:
 			result = None
 
 		if method == 'insert' or (method in {'import', 'add'} and result is None):
-			result = self._insertEntity(entity_class, **arguments)
+			result = self._insertEntity(entity_type, **arguments)
 
 		return result
 
@@ -306,11 +271,6 @@ class RegionDatabase:
 
 		return namespace
 	
-	def contains(self, key):
-		""" Checks if a specific region exists based on name and/or identifier """
-
-		expression = lambda s: s.name == key or key in s.identifiers.string
-		return self.exists('region', expression)
 	def describe(self, section = 'all'):
 		"""
 			Parameters
@@ -345,17 +305,10 @@ class RegionDatabase:
 		print(display_table.draw())
 		return display_table
 	def exists(self, entity_type, expression):
-		entity_class = self._getEntityClass(entity_type)
-		response = entity_class.exists(expression)
+		""" Wrapper around self.select(entity_type, expression).exists() """
+		response =  self.select(entity_type, expression).exists()
 		return response
 
-	def get(self, entity_type, **kwargs):
-		entity_class = self._getEntityClass(entity_type)
-		result = entity_class.get(**kwargs)
-		return result
-
-
-	@pony.orm.db_session
 	def getRegion(self, keys, namespace = None):
 		"""Requests a region based on its name or namespace.
 			Parameters
@@ -388,6 +341,7 @@ class RegionDatabase:
 			for i in candidates:
 				print("\t", i)
 			raise ValueError(message)
+			
 		elif len(candidates) == 0:
 			result = None
 		else:
@@ -413,7 +367,7 @@ class RegionDatabase:
 				select_one: bool; default True
 					Returns a single result
 		"""
-		#region = self.getRegion(region)
+		region = self.getRegion(region)
 
 		_filter = lambda s: (s.code == key or s.name == key) and region in s.region.identifiers
 
@@ -593,7 +547,3 @@ class RegionDatabase:
 				series.tags.add(t)
 		return series
 
-	def select(self, entity_type, expression):
-		entity_class = self._getEntityClass(entity_type)
-		result = entity_class.select(expression)
-		return result
