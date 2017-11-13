@@ -66,17 +66,22 @@ class AbstractSeries:
 
 	def _convertToParsableFormat(self, other):
 		# Convert 'other' into a parsable format.
-		if isinstance(other, list):
-			other = self.emulate(self, sorted(other))
-		elif not (hasattr(other, 'entity_type') and other.entity_type == 'series'):
+		if hasattr(other, 'entity_type') and other.entity_type == 'series':
+			_parsable = other 
+		else:
 			try:
-				other = [(i, float(other)) for i in self.x]
-				other = self.emulate(self, sorted(other))
-			except Exception as exception:
-				message = "Invalid type for series operation: value = {}, type = {}".format(other, type(other))
-				print(message)
-				raise exception
-		return other
+				_parsable = list(other)
+			except TypeError:
+				try:
+					_parsable = [float(other) for _ in self.x]
+				except Exception as exception:
+					message = "Invalid type for series operation: value = {}, type = {}".format(other, type(other))
+					print(message)
+					raise exception
+			
+			_parsable = self.emulate(self, sorted(_parsable))
+
+		return _parsable
 
 	@staticmethod
 	def _apply2DOperation(y, other_y, operation):
@@ -115,15 +120,13 @@ class AbstractSeries:
 		return new_y
 	
 	@classmethod
-	def _applyOperation(cls, self, other, operation, method = 'interpolate', domain = None):
-		""" The point of entry for comparing/applying operations to this series obj. 
+	def _applyOperation(cls, self, other, operation, method = 'extrapolate', domain = None):
+		""" The point of entry for comparing/applying operations to this series object. 
 			Parameters
 			----------
-			cls: The current class of `self`
-			self: 
 			other: number, list, Series
 				The other value set to compare against `self`
-			method: {'interpolate', 'strict', 'inner'}
+			method: {'extrapolate', 'strict', 'inner'}
 			domain: list, tuple
 				The x-values to iterate over. Defalts to `self.x`.
 
@@ -143,6 +146,7 @@ class AbstractSeries:
 			other_y = other(x, method = method, absolute = True)
 			new_y = self._apply2DOperation(y, other_y, operation)
 			result.append((x, new_y))
+		
 		configuration = dict()
 		if operation in {'/'}:
 			configuration['scale'] = None

@@ -473,9 +473,6 @@ class RegionDatabase(CoreDatabase):
 			if isinstance(series_description, str): #checks if None or nan
 				series_json['description'] = series_description
 
-
-			#pprint(series_json)
-			
 			self.addSeries(series_json)
 		print("Imported {} of {} series".format(len(data['series']) - len(skipped), len(data['series'])))
 		db_size = os.path.getsize(self.filename) / 1024**2
