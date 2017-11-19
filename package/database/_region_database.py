@@ -16,7 +16,8 @@ database_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data
 
 standard_datasets = {
 	'europe': os.path.join(database_folder, "eurostat_database.sqlite"),
-	'global': os.path.join(database_folder, "global_database.sqlite")
+	'global': os.path.join(database_folder, "global_database.sqlite"),
+	'test':   os.path.join(database_folder, 'test_database.sqlite')
 }
 
 class CoreDatabase:
@@ -69,7 +70,7 @@ class CoreDatabase:
 	def _initializeDatabase(self, _filename, create):
 
 		if _filename in standard_datasets:
-			_filename = standard_datasets[filename]
+			_filename = standard_datasets[_filename]
 		self.filename = _filename
 		print("Database Filename: ", self.filename)
 
@@ -120,12 +121,12 @@ class CoreDatabase:
 			raise ValueError(message)
 		return result
 
-
+	@pony.orm.db_session
 	def select(self, entity_type, expression):
 		entity_class = self._getEntityClass(entity_type)
 		result = entity_class.select(expression)
 		return result
-
+	@pony.orm.db_session
 	def get(self, entity_type, **kwargs):
 		entity_class = self._getEntityClass(entity_type)
 		try:
@@ -304,11 +305,12 @@ class RegionDatabase(CoreDatabase):
 					display_table.add_row(["", "'{}'".format(series.code), series.name, series.description, series.notes])
 		print(display_table.draw())
 		return display_table
+	@pony.orm.db_session
 	def exists(self, entity_type, expression):
 		""" Wrapper around self.select(entity_type, expression).exists() """
 		response =  self.select(entity_type, expression).exists()
 		return response
-
+	@pony.orm.db_session
 	def getRegion(self, keys, namespace = None):
 		"""Requests a region based on its name or namespace.
 			Parameters
@@ -367,15 +369,33 @@ class RegionDatabase(CoreDatabase):
 				select_one: bool; default True
 					Returns a single result
 		"""
-		region = self.getRegion(region)
+		if isinstance(region, str):
+			regions = [self.getRegion(region)]
+		elif isinstance(region, list):
+			regions = self.getRegions(region)
+		elif hasattr(region, 'entity_type'):
+			if region.entity_type == 'region':
+				regions = region 
+			elif region.entity_type == 'identifier':
+				regions = region.region 
+			else:
+				message = "Invalid Entity Type: '{}'".format(region.entity_type)
+				raise ValueError(message)
+		else:
+			message = "Invalid data: '{}'".format(type(region))
+			raise ValueError(message)
+		
 
-		_filter = lambda s: (s.code == key or s.name == key) and region in s.region.identifiers
+		_filter = lambda s: (s.code == key or s.name == key) and region == s.region
 
-		series = self.select('series', _filter)
+		series_list = list()
+		for region in regions:
+			series = self.select('series', _filter)
+			series_list.append(series)
 
-		if select_one and len(series) > 0:
-			series = series.first()
-		return series
+		if select_one and len(series_list) > 0:
+			series_list = series_list[0]
+		return series_list
 
 	@pony.orm.db_session
 	def addJson(self, data, verbose = False):

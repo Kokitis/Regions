@@ -1,7 +1,7 @@
 import math
 
 from scipy.interpolate import interp1d
-
+from pony.orm import db_session
 
 class AbstractSeries:
 
@@ -41,29 +41,35 @@ class AbstractSeries:
 		value = float(value)
 		return value
 
+	#@db_session
 	def __iter__(self):
 		for i in self.values:
 			yield i
-
+	#@db_session
 	def __add__(self, other):
 		#print("__add__({},{})".format(self, other))
 		return self._applyOperation(self, other, '+')
+	#@db_session
 	def __sub__(self, other):
 		return self._applyOperation(self, other, '-')
+	#@db_session
 	def __mul__(self, other):
 		return self._applyOperation(self, other, '*')
+	#@db_session
 	def __div__(self, other):
 		return self._applyOperation(self, other, '/')
+	#@db_session
 	def __truediv__(self, other):
 		return self._applyOperation(self, other, '/')
-
+	#@db_session
 	def __radd__(self, other):
 		#print("__radd__({}, {})".format(self, other))
 		return self.__add__(other)
+	#@db_session
 	def __rmul__(self, other):
 		return self.__mul__(other)
 
-
+	@db_session
 	def _convertToParsableFormat(self, other):
 		# Convert 'other' into a parsable format.
 		if hasattr(other, 'entity_type') and other.entity_type == 'series':
@@ -73,7 +79,7 @@ class AbstractSeries:
 				_parsable = list(other)
 			except TypeError:
 				try:
-					_parsable = [float(other) for _ in self.x]
+					_parsable = [(i, float(other)) for i in self.x]
 				except Exception as exception:
 					message = "Invalid type for series operation: value = {}, type = {}".format(other, type(other))
 					print(message)
@@ -118,9 +124,9 @@ class AbstractSeries:
 			raise ValueError(message)
 		
 		return new_y
-	
+
 	@classmethod
-	def _applyOperation(cls, self, other, operation, method = 'extrapolate', domain = None):
+	def _applyOperation(cls, left, right, operation, method = 'extrapolate', domain = None):
 		""" The point of entry for comparing/applying operations to this series object. 
 			Parameters
 			----------
@@ -129,32 +135,42 @@ class AbstractSeries:
 			method: {'extrapolate', 'strict', 'inner'}
 			domain: list, tuple
 				The x-values to iterate over. Defalts to `self.x`.
-
 			Returns
 			-------
 			result: Series
 		"""
-		if other == 0: return self # sum() tries to add 0 to the objects
 
-		if domain is None: domain = self.x
+		if not hasattr(left, 'entity_type') or left.entity_type != 'series':
+			if hasattr(right, 'entity_type') and right.entity_type == 'series':
+				left, right = right, left
+			else:
+				print('Left Argument Type: ', type(left))
+				print('Right Argument Type: ', type(right))
+				raise TypeError('At least one of the arguments must be a series!')
+			
+		if right == 0: 
+			return left # sum() tries to add 0 to the objects
 
-		other = self._convertToParsableFormat(other)
+		if domain is None: domain = left.x
+
+		right = left._convertToParsableFormat(right)
+
 		result = list()
 
 		for x in domain:
-			y = self(x, method = method, absolute = True)
-			other_y = other(x, method = method, absolute = True)
-			new_y = self._apply2DOperation(y, other_y, operation)
+			y = left(x, method = method, absolute = True)
+			other_y = right(x, method = method, absolute = True)
+			new_y = left._apply2DOperation(y, other_y, operation)
 			result.append((x, new_y))
 		
 		configuration = dict()
 		if operation in {'/'}:
 			configuration['scale'] = None
 		else:
-			configuration['scale'] = self.scale
+			configuration['scale'] = left.scale
 		
 
-		result = self.emulate(self, result, **configuration)
+		result = left.emulate(left, result, **configuration)
 
 		return result
 	
@@ -197,16 +213,17 @@ class AbstractSeries:
 	def emulate(cls, template, values, **kwargs):
 		raise NotImplementedError
 
+	@db_session
 	def _splitStringValues(self):
 		numeric_values = [
-			(int(i[0]), float(i[1]) * self._rate)
+			(int(i[0]), float(i[1]) * self._rate())
 			for i in [
 				point.split('|') for point in self.strvalues.split('||')
 			]
 		]
 		return numeric_values
 
-	@property
+	@db_session
 	def _rate(self):
 		_i = self.scale
 		if not _i:

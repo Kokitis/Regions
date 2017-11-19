@@ -19,7 +19,7 @@ def addReport(dataset, string, *args):
 	elif string.startswith('WPP'):
 		result = addWorldPopulationProspects(dataset, *args)
 	else:
-		message = "Incorect report key: ''".format(string)
+		message = "Incorrect report key: '{}'".format(string)
 		raise ValueError(message)
 	return result
 def _addWorldEconomicOutlook(dataset):

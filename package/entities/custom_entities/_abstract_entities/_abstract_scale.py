@@ -1,8 +1,9 @@
 from ....github import numbertools
-
+from pony.orm import db_session
 
 # noinspection PyTypeChecker
 class AbstractScale:
+	@db_session
 	def __float__(self):
 		""" Returns a floating-point represenation f 'Scale'
 			Ex. Scale('Thousands') -> 1E3
@@ -34,7 +35,7 @@ class AbstractScale:
 
 	def __str__(self):
 		return "Scale('{}')".format(self.string)
-
+	@db_session
 	def __call__(self, array, human_readable = False):
 		""" Returns the scaled version of the provided array.
 			Ex. Scale('Hundreds')([1,2,3]) -> [100, 200, 300]
@@ -49,14 +50,14 @@ class AbstractScale:
 		if human_readable:
 			result = numbertools.humanReadable(array)
 		return result
-
+	@db_session
 	def __mul__(self, other):
 		""" Multiplies a value by the floating-point representation of this Scale object."""
 
 		result = other * float(self)
 
 		return result
-
+	@db_session
 	def __rmul__(self, other):
 		return self.__mul__(other)
 
