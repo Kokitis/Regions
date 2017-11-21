@@ -10,3 +10,5 @@ class TestWidgets(unittest.TestCase):
 
 		result = [(i in ['USA', 'CAN']) for i in candidates]
 		assert result
+	def testTableConversion(self):
+		pass

@@ -3,7 +3,7 @@ import unittest
 
 from pony.orm import db_session
 
-from common import *
+from common import DATASET, TEST_REGION, TEST_SERIES, TEST_REPORT, TEST_IDENTIFIER, TEST_AGENCY, TEST_UNIT, TEST_SCALE
 
 subject_code = 'LP'
 database = DATASET
