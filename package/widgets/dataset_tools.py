@@ -1,6 +1,8 @@
 from texttable import Texttable
 from fuzzywuzzy import process
 def extractRegion(dataset, region_list):
+    """ Attempts to match each string in 'region_list' with a region in the database.
+    """
     region_names = list(i.name for i in dataset.Region.select(lambda s: s))
     #print(region_names)
     table = Texttable()
@@ -13,12 +15,14 @@ def extractRegion(dataset, region_list):
         else:
             match = process.extractOne(region, region_names)
             key, score = match
-        r = dataset.access('get', 'region', key)
+        r = dataset.getRegion(key)
+
         ident = [
             i for i in r.identifiers
             if (len(i.string) == 3 and not i.string.isdigit())
         ]
-        if len(ident) == 1: ident = ident.pop().string
+        if len(ident) == 1: 
+            ident = ident.pop().string
 
         table.add_row([region, r.name, ident, region == r.name, score])
         candidates.append(ident)

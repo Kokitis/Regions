@@ -7,3 +7,4 @@ from pytools import tabletools
 from .test_objects import *
 
 TRUTHSET = tabletools.Table(os.path.join(os.path.dirname(__file__), 'truthset.xlsx'))
+DATASET = RegionDatabase('test')

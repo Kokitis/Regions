@@ -6,7 +6,7 @@ from pony.orm import db_session
 from common import *
 
 subject_code = 'LP'
-database = RegionDatabase('test')
+database = DATASET
 
 class VerifyEntityData(unittest.TestCase):
 	"""Verifies the integrity of the data in each object."""

@@ -226,9 +226,9 @@ class RegionDatabase(CoreDatabase):
 				data: str, dict, Entity
 
 		"""
-
-		#entity_class = self._getEntityClass(entity_type)
-
+		if entity_type == 'region':
+			message = "The retrieval of 'region' entities is not supported. Use *.getRegion() instead."
+			raise KeyError(message)
 		arguments = self._validateEntityArguments(entity_type, data, **kwargs)
 
 		if arguments is None:
@@ -310,6 +310,15 @@ class RegionDatabase(CoreDatabase):
 		""" Wrapper around self.select(entity_type, expression).exists() """
 		response =  self.select(entity_type, expression).exists()
 		return response
+
+	@pony.orm.db_session
+	def contains(self, string):
+		""" Wrapper over self.exists() to test for regions, either by name or code. """
+
+		expression = lambda s: s.name == string or string in s.identifiers.string 
+		result = self.exists('region', expression)
+		return result
+
 	@pony.orm.db_session
 	def getRegion(self, keys, namespace = None):
 		"""Requests a region based on its name or namespace.
@@ -326,9 +335,12 @@ class RegionDatabase(CoreDatabase):
 		"""
 		if not isinstance(keys, (list,tuple,set)):
 			keys = [keys]
-		keys = (i for i in keys if isinstance(i, str))
+		keys = list(i for i in keys if isinstance(i, str))
+
 
 		candidates = self.select('identifier', lambda s: s.string in keys)
+		if len(candidates) == 0:
+			candidates = self.select('region', lambda s: s.name in keys)
 
 		if namespace is not None:
 			namespace = self.access('get', 'namespace', namespace)
@@ -347,7 +359,11 @@ class RegionDatabase(CoreDatabase):
 		elif len(candidates) == 0:
 			result = None
 		else:
-			result = candidates.first().region
+			first = candidates.first()
+			if first.entity_type == 'identifier':
+				result = first.region
+			else:
+				result = first 
 
 		return result
 	

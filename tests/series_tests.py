@@ -5,7 +5,7 @@ from pony.orm import db_session
 from common import *
 
 subject_code = 'LP'
-database = RegionDatabase('test')
+database = DATASET
 
 def checkSeriesValues(series, key):
 	truthset = TRUTHSET('subjectName', key)
