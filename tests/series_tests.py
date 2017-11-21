@@ -1,75 +1,29 @@
 import unittest
-
+import math
 from pony.orm import db_session
 
-from package import *
+from common import *
 
 subject_code = 'LP'
 database = RegionDatabase('test')
 
-def _applyArithmetic(y, other_y, operation):
-	# Basic operations
-	if operation == '+':
-		new_y = y + other_y
-	elif operation == '-':
-		new_y = y - other_y
-	elif operation == '*':
-		new_y = y * other_y
-	elif operation == '/':
-		new_y = y / other_y
+def checkSeriesValues(series, key):
+	truthset = TRUTHSET('subjectName', key)
+	scale = series.scale 
+	if scale is None:
+		scale = 1.0
+	values = sorted([(y,v) for y, v in truthset.items() if isinstance(y, int)])
+	values = [(y, v*scale) for y, v in values]
 
-	# Relational operations
-	elif operation == '==':
-		new_y = y == other_y
-	elif operation == '>=':
-		new_y = y >= other_y
-	elif operation == '>':
-		new_y = y > other_y
-	elif operation == '<':
-		new_y = y < other_y
-	elif operation == '<=':
-		new_y = y <= other_y 
-	elif operation == '!=':
-		new_y = y != other_y
-
-	elif operation == '%':
-		# Relative change
-		new_y = (other_y - y) / y 
-	else:
-		message = "Invalid operation: '{}'".format(operation)
-		raise ValueError(message)
-
-	return new_y
-@db_session
-def testSeriesArithmetic(series, other_series, operation):
-	""" Assume series 1 is USA and series 2 is Canada"""
-	results = list()
-	actual_values = {a[0]: _applyArithmetic(a[1], b[1], operation) for a, b in zip(series.values, other_series.values)}
+	checked = [(l[0] == r[0] and math.isclose(l[0], r[0])) for l, r in zip(values, sorted(series.values))]
+	result = all(checked)
+	if not result:
+		for left, right in zip(values, series.values):
+			print("{} != {}".format(left, right))
 	
-	addition = _applyArithmetic(series, other_series, operation)
+	return result
 
-	for y, v in addition:
-		results.append(v == actual_values[y])
-	
-	return all(results)
-
-def testScalarArithmetic(series, scalar, operation):
-	new_series = _applyArithmetic(series, scalar, operation)
-
-	bool_series = list()
-
-	for a, b in zip(series, new_series):
-		
-		left = _applyArithmetic(a[1], 5, operation) 
-		right= b[1]
-
-		bool_series.append(left == right)
-		bool_series.append(a[0] == b[0])
-	return all(bool_series)
-
-
-
-class TestSeries(unittest.TestCase):
+class TestSeriesMethods(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		print('Setting Up')
@@ -80,37 +34,29 @@ class TestSeries(unittest.TestCase):
 		other_region = database.getRegion('CAN')
 		other_series = other_region.getSeries(subject_code)
 
-		cls.series = series
-		cls.other_series = other_series
+		cls.left = series
+		cls.right = other_series
 		cls.scalar = 5
-		print(cls.series)
-		print(cls.other_series)
 	
 	################### Series Arithmetic #######################
 	@db_session
 	def testSeriesAddition(self):
-		self.assertTrue(testSeriesArithmetic(self.series, self.other_series, '+'))
-		self.assertTrue(testScalarArithmetic(self.series, self.scalar, '+'))
-	@db_session
+		addition_series = self.left + self.right 
+		assert checkSeriesValues(addition_series, 'addition')
 	def testSeriesSubtraction(self):
-		self.assertTrue(testSeriesArithmetic(self.series, self.other_series, '-'))
-		#self.assertTrue(testScalarArithmetic(self.series, self.scalar, '-'))
-	@db_session
+		subtraction_series = self.left - self.right
+		assert checkSeriesValues(subtraction_series, 'subtraction')
 	def testSeriesMultiplication(self):
-		self.assertTrue(testSeriesArithmetic(self.series, self.other_series, '*'))
-		self.assertTrue(testScalarArithmetic(self.series, self.scalar, '*'))
-	@db_session
+		multiplication_series = self.left * self.right 
+		assert checkSeriesValues(multiplication_series, 'multiplication')
 	def testSeriesDivision(self):
-		self.assertTrue(testSeriesArithmetic(self.series, self.other_series, '/'))
-		#self.assertTrue(testScalarArithmetic(self.series, self.scalar, '/'))
+		division_series = self.left / self.right 
 
-	def testSeriesPercentChange(self):
-		self.assertTrue(testSeriesArithmetic(self.series, self.other_series, '%'))
-		#self.assertTrue(testScalarArithmetic(self.series, self.scalar, '%'))
-
-	################## Series Methods ##############################
-	def testSeriesYearlyChangeGrowth(self):
+		assert checkSeriesValues(division_series, 'division')
+	def testSeriesInterpolation(self):
 		pass
+	
+
 
 def runSeriesTests():
 	with db_session:
