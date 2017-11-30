@@ -55,7 +55,27 @@ class TestSeriesMethods(unittest.TestCase):
 		assert checkSeriesValues(division_series, 'division')
 	def testSeriesInterpolation(self):
 		pass
+
+	def testYearlyChange(self):
+		change_series = self.left.timeChange('yearlyChange')
+		growth_series = self.left.timeChange('yearlyGrowth')
+		dtime_series  = self.left.timeChange('doublingTime')
+		dyear_series  = self.left.timeChange('doublingYear')
+		cumulative_series = self.left.timeChange('cumulative')
+
+		assert checkSeriesValues(change_series, 'yearlyChange')
+		assert checkSeriesValues(growth_series, 'yearlyGrowth')
+		assert checkSeriesValues(dtime_series, 'doublingTime')
+		assert checkSeriesValues(dyear_series, 'doublingYear')
+		assert checkSeriesValues(cumulative_series, 'cumulative')
 	
+	def testIndexYear(self):
+		year = 2000
+		index_series = self.left.indexYear(year)
+		assert checkSeriesValues(index_series, 'indexYear')
+
+	def testSeriesCall(self):
+		valid_year = 
 
 
 def runSeriesTests():

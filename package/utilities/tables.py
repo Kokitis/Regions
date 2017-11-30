@@ -89,7 +89,7 @@ def getRequiredColumns(table_columns, **kwargs):
 	series_scale_column = parseKeywords(
 		table_columns, 
 		[
-			'scale', 'multiplier', kwargs.get('scaleColumn')
+			'scale', 'multiplier', 'seriesScale', kwargs.get('scaleColumn')
 		], 
 		return_type = 'column'
 	)

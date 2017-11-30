@@ -44,7 +44,6 @@ class ConvertTable:
 		assert isinstance(report, dict)
 		assert isinstance(report.get('agency'), str)
 
-		#agency, namespace, report = self.handleRequiredArguments(agency, namespace, report)
 		series_list = self.importTable(filename, **kwargs)
 
 		json = {
@@ -309,7 +308,6 @@ class ConvertTable:
 		}
 		if isinstance(unit_code, str):
 			result['unitCode'] = unit_code
-
 
 		return result
 

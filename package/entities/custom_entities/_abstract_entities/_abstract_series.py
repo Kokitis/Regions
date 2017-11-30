@@ -343,32 +343,43 @@ class AbstractSeries:
 					'yearlyChange': The absolute change between years
 					'doublingTime': The total time for the series to double in value
 					'doublingYear': The year the series will double in value
+					'cumulative': The cumulative value, with year 0 being the earliest value.
 			Returns
 			----------
 				series: list<tuple<int,number>>
 		"""
 
 		newseries = list()
+
+		cumulative_total = 0
 		for year in self.x:
 
 			v1 = self(year-1)
 			v2 = self(year)
 
-			value = v2 - v1 
+			difference = v2 - v1 
+			ratio = v2 / v1
 			if kind == 'yearlyChange':
-				pass
+				value = difference
 			elif kind == 'yearlyGrowth':
-				value /= v1
+				value = ratio
 			
 			elif kind == 'doublingTime':
-				value = (math.log(2)) / math.log(value)
+				value = math.log(2) / math.log(ratio)
 			
 			elif kind == 'doublingYear':
-				value = (math.log(2)) / math.log(value)
+				value = math.log(2) / math.log(ratio)
 				value += year
+			elif kind == 'cumulative':
+				cumulative_total += v2
+				value = cumulative_total
 			else:
-				message = "Invalid operation: '{}' ({})".format(kind, ", ".join({'doublingTime', 'doublingYear', 'yearlyGrowth', 'yearlyChange'}))
+				message = "Invalid operation: '{}' ({})".format(
+					kind, 
+					", ".join({'doublingTime', 'doublingYear', 'yearlyGrowth', 'yearlyChange'})
+				)
 				raise ValueError(message)
+
 			if not math.isnan(value):
 				newseries.append((year, value))
 		newseries = self.emulate(self, newseries)
@@ -400,18 +411,21 @@ class AbstractSeries:
 
 		return series_dict
 	
-	def compareYears(self, initial_year, final_year):
+	def indexYear(self, index_year):
 		""" Describes how a series has changed over time.
 			Parameters
 			----------
 		"""
 
-		a = self(initial_year)
-		b = self(final_year)
+		index = self(index_year)
 
-		pct = (b - a) / a
-
-		return pct
+		result = list()
+		for year, value in self:
+			new_value = (index - value) / index 
+			result.append((year, new_value))
+		
+		new_series = self.emulate(self, result)
+		return new_series
 
 	def average(self):
 		return sum(self.y) / len(self.x)

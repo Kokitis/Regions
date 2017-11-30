@@ -71,6 +71,9 @@ class CoreDatabase:
 
 		if _filename in standard_datasets:
 			_filename = standard_datasets[_filename]
+		elif _filename == 'temp':
+			_filename = ':memory:'
+
 		self.filename = _filename
 		print("Database Filename: ", self.filename)
 
@@ -226,7 +229,7 @@ class RegionDatabase(CoreDatabase):
 				data: str, dict, Entity
 
 		"""
-		if entity_type == 'region':
+		if entity_type == 'region' and method in {'get', 'request'}:
 			message = "The retrieval of 'region' entities is not supported. Use *.getRegion() instead."
 			raise KeyError(message)
 		arguments = self._validateEntityArguments(entity_type, data, **kwargs)
@@ -337,14 +340,18 @@ class RegionDatabase(CoreDatabase):
 			keys = [keys]
 		keys = list(i for i in keys if isinstance(i, str))
 
-
+		candidate_type = 'identifier'
 		candidates = self.select('identifier', lambda s: s.string in keys)
 		if len(candidates) == 0:
+			candidate_type = 'region'
 			candidates = self.select('region', lambda s: s.name in keys)
 
 		if namespace is not None:
 			namespace = self.access('get', 'namespace', namespace)
-			candidates = candidates.filter(lambda s: s.namespace == namespace)
+			if candidate_type == 'identifier':
+				candidates = candidates.filter(lambda s: s.namespace == namespace)
+			else:
+				candidates = candidates.filter(lambda s: namespace in s.identifiers.namespace)
 
 		if len(candidates) > 1:
 			message = "Error when searching for regions!"
@@ -438,10 +445,7 @@ class RegionDatabase(CoreDatabase):
 		"""
 		print("Importing from JSON", flush = True)
 		timer = timetools.Timer()
-		if os.path.exists(self.filename):
-			db_size = os.path.getsize(self.filename) / 1024**2
-		else:
-			db_size = 0.0
+		db_size = self.filesize
 		print("size of database: {:.2f} MB".format(db_size))
 		namespace_code = data['namespace']
 		self.addNamespace(namespace_code)
@@ -511,7 +515,7 @@ class RegionDatabase(CoreDatabase):
 
 			self.addSeries(series_json)
 		print("Imported {} of {} series".format(len(data['series']) - len(skipped), len(data['series'])))
-		db_size = os.path.getsize(self.filename) / 1024**2
+		db_size = self.filesize
 		print("Size of database: {:.2f} MB".format(db_size))
 		print("Finished in ", timer)
 		if verbose:
@@ -580,3 +584,10 @@ class RegionDatabase(CoreDatabase):
 				series.tags.add(t)
 		return series
 
+	@property 
+	def filesize(self):
+		if os.path.exists(self.filename):
+			db_size = os.path.getsize(self.filename) / 1024**2
+		else:
+			db_size = 0.0
+		return db_size
