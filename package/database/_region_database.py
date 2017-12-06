@@ -443,10 +443,23 @@ class RegionDatabase(CoreDatabase):
 				when importing series, including which regions could
 				not be updated.
 		"""
+
+		######################## Validate Arguments ##############################
+		# validate agency
+
+		# validate report
+
+		# validate series
+
+		
+		########################## Setup #######################################
 		print("Importing from JSON", flush = True)
 		timer = timetools.Timer()
 		db_size = self.filesize
 		print("size of database: {:.2f} MB".format(db_size))
+
+
+		############################## Workflow ###############################
 		namespace_code = data['namespace']
 		self.addNamespace(namespace_code)
 
@@ -471,10 +484,7 @@ class RegionDatabase(CoreDatabase):
 
 			if region is None:
 				if region_code not in skipped_region_codes:
-					#print("Could not find region when importing series!")
-					#print("\tRegion Code:\t'{}'\t{}".format(region_code, type(region_code)))
-					#print("\tRegion Name:\t'{}'\t{}".format(region_name, type(region_name)))
-					#print("\tNamespace:\t'{}'".format(namespace_code))
+
 					skipped_region_codes.add(str(region_code))
 					skipped.add((region_code, region_name, namespace_code, row['seriesCode']))
 				continue
