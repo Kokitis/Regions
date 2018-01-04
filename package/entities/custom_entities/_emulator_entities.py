@@ -1,5 +1,5 @@
 from ._abstract_entities import AbstractRegion, AbstractSeries
-from pprint import pprint
+
 class EmulatorRegion(AbstractRegion):
 	""" Defines a class that should operate as a drop-in replacement
 		for any other Region entity. 

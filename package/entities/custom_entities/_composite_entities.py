@@ -1,5 +1,4 @@
 import pony
-from pprint import pprint
 from ...github import numbertools
 from ._emulator_entities import EmulatorRegion, EmulatorSeries
 

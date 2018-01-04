@@ -127,17 +127,20 @@ class AbstractSeries:
 
 	@classmethod
 	def _applyOperation(cls, left, right, operation, method = 'extrapolate', domain = None):
-		""" The point of entry for comparing/applying operations to this series object. 
+
+		"""
+			The point of entry for comparing/applying operations to this series object.
 			Parameters
 			----------
-			other: number, list, Series
-				The other value set to compare against `self`
-			method: {'extrapolate', 'strict', 'inner'}
-			domain: list, tuple
-				The x-values to iterate over. Defalts to `self.x`.
+			left
+			right
+			operation: {'extrapolate', 'strict', 'inner'}
+			method
+			domain
+
 			Returns
 			-------
-			result: Series
+				Series
 		"""
 
 		if not hasattr(left, 'entity_type') or left.entity_type != 'series':

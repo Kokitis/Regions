@@ -154,5 +154,4 @@ def importDatabaseEntities(db):
 		'scale': Scale
 	}
 
-	#return Agency, Identifier, Namespace, Observation, Region, Report, Series, Tag, Unit, Scale
 	return _entities
