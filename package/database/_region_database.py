@@ -7,7 +7,7 @@ from pprint import pprint
 import pony
 import progressbar
 
-from .. import entities
+from . import entities
 
 from ..utilities import namespaces, validation, getDefinition
 from ..github import Texttable, timetools

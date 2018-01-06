@@ -1,6 +1,6 @@
 import progressbar
 
-from . import tables, validation
+from ..utilities import tables, validation
 from ..github import tabletools
 from pprint import pprint
 

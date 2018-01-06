@@ -30,7 +30,7 @@ def compareProjections(dataset, regions, projection, *years):
         for y in years:
             proj = series(y, absolute = True)
             change = proj - current
-            pct_change = (change) / current
+            pct_change = change / current
             
             row += ["{:,}".format(proj), "{:,}".format(change), "{:.2%}".format(pct_change)]
         

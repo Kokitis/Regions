@@ -1,5 +1,4 @@
 
-from . import entities
 from . import utilities
 from .database import RegionDatabase
 from .data import *
