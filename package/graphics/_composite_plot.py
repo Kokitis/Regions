@@ -27,6 +27,7 @@ class CompositePlot:
 		self.fig, self.ax = plt.subplots(figsize = figsize)
 
 	def addSeries(self, composite_series, **kwargs):
+		pass
 
 		
 

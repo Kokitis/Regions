@@ -44,6 +44,12 @@ class RegionPlot:
             self._plotSeries(other, **kwargs)
             self.formatPlot(other[0])
 
+    def _configurePlotScheme(self, scheme, **kwargs):
+        if scheme == 'fivethirtyeight':
+            pass 
+        elif scheme == 'ourworldindata':
+            pass
+
     def plotOption(self, key, value = None):
         if value:
             self._format_options[key] = value 

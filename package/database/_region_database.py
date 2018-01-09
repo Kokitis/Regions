@@ -7,7 +7,7 @@ from pprint import pprint
 import pony
 import progressbar
 
-from .. import entities
+from . import entities
 
 from ..utilities import namespaces, validation, getDefinition
 from ..github import Texttable, timetools
@@ -16,15 +16,11 @@ database_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data
 
 standard_datasets = {
 	'europe': os.path.join(database_folder, "eurostat_database.sqlite"),
-	'global': os.path.join(database_folder, "global_database.sqlite")
+	'global': os.path.join(database_folder, "global_database.sqlite"),
+	'test':   os.path.join(database_folder, 'test_database.sqlite')
 }
 
-class RegionDatabase:
-	""" Accesses a database with information concerning various regions.
-	"""
-	###########################
-	# 
-	###########################
+class CoreDatabase:
 	def __init__(self, filename, create = False):
 		"""
 			Parameters
@@ -34,11 +30,6 @@ class RegionDatabase:
 		"""
 		self.create = create
 		self._main_database = self._initializeDatabase(filename, create)
-
-	##########################
-	#    Private Methods     #
-	##########################
-
 	def _getEntityClass(self, entity):
 		""" Matches an entity string to the corresponding class.
 			Parameters
@@ -58,8 +49,6 @@ class RegionDatabase:
 			_class = self.Identifier
 		elif entity == 'namespace':
 			_class = self.Namespace
-		elif entity == 'observation':
-			_class = self.Observation
 		elif entity == 'region':
 			_class = self.Region
 		elif entity == 'report':
@@ -78,11 +67,14 @@ class RegionDatabase:
 
 		return _class
 
-	def _initializeDatabase(self, filename, create):
+	def _initializeDatabase(self, _filename, create):
 
-		if filename in standard_datasets:
-			filename = standard_datasets[filename]
-		self.filename = filename
+		if _filename in standard_datasets:
+			_filename = standard_datasets[_filename]
+		elif _filename == 'temp':
+			_filename = ':memory:'
+
+		self.filename = _filename
 		print("Database Filename: ", self.filename)
 
 		_database = pony.orm.Database()
@@ -101,13 +93,13 @@ class RegionDatabase:
 		self.Unit 		= _entities['unit']
 		self.Scale 		= _entities['scale']
 
-		_database.bind("sqlite", filename, create_db = create) #create_tables
+		_database.bind("sqlite", self.filename, create_db = create) #create_tables
 		_database.generate_mapping(create_tables = create)
 
 		return _database
 
 	@pony.orm.db_session
-	def _insertEntity(self, entity_class, **kwargs):
+	def _insertEntity(self, entity_type, **kwargs):
 		""" Inserts an entity into the database. Assumes valid data was passed.
 			Parameters
 			----------
@@ -120,7 +112,7 @@ class RegionDatabase:
 			message = "The database must be initialized with the 'create' keyword set to True."
 			print(message)
 			return None
-
+		entity_class = self._getEntityClass(entity_type)
 		try:
 			result = entity_class(**kwargs)
 		except Exception as exception:
@@ -132,74 +124,51 @@ class RegionDatabase:
 			raise ValueError(message)
 		return result
 
+	@pony.orm.db_session
+	def select(self, entity_type, expression):
+		entity_class = self._getEntityClass(entity_type)
+		result = entity_class.select(expression)
+		return result
+	@pony.orm.db_session
+	def get(self, entity_type, **kwargs):
+		entity_class = self._getEntityClass(entity_type)
+		try:
+			result = entity_class.get(**kwargs)
+		except TypeError:
+			#The entity class doesn't have one of the attribute keys passed in kwargs
+			result = None
+		return result
+
+
+
+class RegionDatabase(CoreDatabase):
+	""" Accesses a database with information concerning various regions.
+	"""
+
+	##########################
+	#    Private Methods     #
+	##########################
 	
-	@staticmethod
-	def _searchByString(entity_class, string, search_field = 'all'):
+	def _searchByString(self, entity_type, string):
 		"""
 			Searches for an entity based on a single key string.
 			Parameters
 			----------
-			entity_class: string, Entity
+			entity_type: string
 				The entity type to search through
 			string: str
 				The key to search for.
-			search_field: {'all', 'code', 'name', 'value'}; default 'all'
-				A specific class field to search through. If not provided,
-				Will search through a number of fields based on the entity type.
 			Returns
 			-------
 				result: Entity, None
 		"""
-		# For readability and shorter code.
 
-		_checkFields = lambda r, l: r is None and search_field in {'all', l} and hasattr(entity_class, l)
-
-		if string is None:
-			return None
-		elif _checkFields(None, 'code'):
-			result = entity_class.get(code=string)
+		for key in ['code', 'name', 'string']:
+			result = self.get(entity_type, **{key: string})
+			if result is not None:
+				break
 		else:
 			result = None
-
-		if _checkFields(result, 'name'):
-			result = entity_class.get(name=string)
-
-		if _checkFields(result, 'string'):
-			result = entity_class.get(string=string)
-
-		return result
-
-	def _searchByKeywords(self, entity_class, **kwargs):
-		"""
-			Searches for a match between the identifying features in a dict
-			and the entities in the database.
-			Parameters
-			----------
-				entity_class: str, Entity
-					A valid entity class or identifier
-				keywords: dict<{'code', 'name', 'value', 'namespace'}:scalar>
-					One or more keywords that identify a single entity in the dataset.
-					if searching for a region, namespace must be provided.
-		"""
-		if isinstance(entity_class, str):
-			entity_type = entity_class
-		else:
-			entity_type = entity_class.entity_type
-		data = validation.parseEntityArguments(entity_type, kwargs)
-
-		entity_code = data.get('code')
-		entity_name = data.get('name')
-		entity_string = data.get('string')
-
-
-		result = self._searchByString(entity_class, entity_code, 'code')
-
-		if result is None and hasattr(entity_class, 'name'):
-			result = self._searchByString(entity_class, entity_name, 'name')
-
-		if result is None and entity_string is not None and hasattr(entity_class, 'string'):
-			result = self._searchByString(entity_class, entity_string, 'string')
-
 		return result
 	
 	@staticmethod
@@ -260,27 +229,27 @@ class RegionDatabase:
 				data: str, dict, Entity
 
 		"""
-
-		entity_class = self._getEntityClass(entity_type)
-
+		if entity_type == 'region' and method in {'get', 'request'}:
+			message = "The retrieval of 'region' entities is not supported. Use *.getRegion() instead."
+			raise KeyError(message)
 		arguments = self._validateEntityArguments(entity_type, data, **kwargs)
 
 		if arguments is None:
 			return data #Data is an entity object
 
 		if method in {'get', 'retrieve'}:
-			result = self.get(entity_class, **arguments)
+			result = self.get(entity_type, **arguments)
 
 		elif method in {'add', 'import', 'search'}:
 			if isinstance(data, str):
-				result = self._searchByString(entity_class, data)
+				result = self._searchByString(entity_type, data)
 			else:
-				result = self._searchByKeywords(entity_class,**arguments)
+				result = self.get(entity_type, **arguments)
 		else:
 			result = None
 
 		if method == 'insert' or (method in {'import', 'add'} and result is None):
-			result = self._insertEntity(entity_class, **arguments)
+			result = self._insertEntity(entity_type, **arguments)
 
 		return result
 
@@ -306,11 +275,6 @@ class RegionDatabase:
 
 		return namespace
 	
-	def contains(self, key):
-		""" Checks if a specific region exists based on name and/or identifier """
-
-		expression = lambda s: s.name == key or key in s.identifiers.string
-		return self.exists('region', expression)
 	def describe(self, section = 'all'):
 		"""
 			Parameters
@@ -344,16 +308,19 @@ class RegionDatabase:
 					display_table.add_row(["", "'{}'".format(series.code), series.name, series.description, series.notes])
 		print(display_table.draw())
 		return display_table
+	@pony.orm.db_session
 	def exists(self, entity_type, expression):
-		entity_class = self._getEntityClass(entity_type)
-		response = entity_class.exists(expression)
+		""" Wrapper around self.select(entity_type, expression).exists() """
+		response =  self.select(entity_type, expression).exists()
 		return response
 
-	def get(self, entity_type, **kwargs):
-		entity_class = self._getEntityClass(entity_type)
-		result = entity_class.get(**kwargs)
-		return result
+	@pony.orm.db_session
+	def contains(self, string):
+		""" Wrapper over self.exists() to test for regions, either by name or code. """
 
+		expression = lambda s: s.name == string or string in s.identifiers.string 
+		result = self.exists('region', expression)
+		return result
 
 	@pony.orm.db_session
 	def getRegion(self, keys, namespace = None):
@@ -371,13 +338,20 @@ class RegionDatabase:
 		"""
 		if not isinstance(keys, (list,tuple,set)):
 			keys = [keys]
-		keys = (i for i in keys if isinstance(i, str))
+		keys = list(i for i in keys if isinstance(i, str))
 
+		candidate_type = 'identifier'
 		candidates = self.select('identifier', lambda s: s.string in keys)
+		if len(candidates) == 0:
+			candidate_type = 'region'
+			candidates = self.select('region', lambda s: s.name in keys)
 
 		if namespace is not None:
 			namespace = self.access('get', 'namespace', namespace)
-			candidates = candidates.filter(lambda s: s.namespace == namespace)
+			if candidate_type == 'identifier':
+				candidates = candidates.filter(lambda s: s.namespace == namespace)
+			else:
+				candidates = candidates.filter(lambda s: namespace in s.identifiers.namespace)
 
 		if len(candidates) > 1:
 			message = "Error when searching for regions!"
@@ -388,10 +362,15 @@ class RegionDatabase:
 			for i in candidates:
 				print("\t", i)
 			raise ValueError(message)
+			
 		elif len(candidates) == 0:
 			result = None
 		else:
-			result = candidates.first().region
+			first = candidates.first()
+			if first.entity_type == 'identifier':
+				result = first.region
+			else:
+				result = first 
 
 		return result
 	
@@ -413,15 +392,33 @@ class RegionDatabase:
 				select_one: bool; default True
 					Returns a single result
 		"""
-		#region = self.getRegion(region)
+		if isinstance(region, str):
+			regions = [self.getRegion(region)]
+		elif isinstance(region, list):
+			regions = self.getRegions(region)
+		elif hasattr(region, 'entity_type'):
+			if region.entity_type == 'region':
+				regions = region 
+			elif region.entity_type == 'identifier':
+				regions = region.region 
+			else:
+				message = "Invalid Entity Type: '{}'".format(region.entity_type)
+				raise ValueError(message)
+		else:
+			message = "Invalid data: '{}'".format(type(region))
+			raise ValueError(message)
+		
 
-		_filter = lambda s: (s.code == key or s.name == key) and region in s.region.identifiers
+		_filter = lambda s: (s.code == key or s.name == key) and region == s.region
 
-		series = self.select('series', _filter)
+		series_list = list()
+		for region in regions:
+			series = self.select('series', _filter)
+			series_list.append(series)
 
-		if select_one and len(series) > 0:
-			series = series.first()
-		return series
+		if select_one and len(series_list) > 0:
+			series_list = series_list[0]
+		return series_list
 
 	@pony.orm.db_session
 	def addJson(self, data, verbose = False):
@@ -446,13 +443,23 @@ class RegionDatabase:
 				when importing series, including which regions could
 				not be updated.
 		"""
+
+		######################## Validate Arguments ##############################
+		# validate agency
+
+		# validate report
+
+		# validate series
+
+		
+		########################## Setup #######################################
 		print("Importing from JSON", flush = True)
 		timer = timetools.Timer()
-		if os.path.exists(self.filename):
-			db_size = os.path.getsize(self.filename) / 1024**2
-		else:
-			db_size = 0.0
+		db_size = self.filesize
 		print("size of database: {:.2f} MB".format(db_size))
+
+
+		############################## Workflow ###############################
 		namespace_code = data['namespace']
 		self.addNamespace(namespace_code)
 
@@ -477,10 +484,7 @@ class RegionDatabase:
 
 			if region is None:
 				if region_code not in skipped_region_codes:
-					#print("Could not find region when importing series!")
-					#print("\tRegion Code:\t'{}'\t{}".format(region_code, type(region_code)))
-					#print("\tRegion Name:\t'{}'\t{}".format(region_name, type(region_name)))
-					#print("\tNamespace:\t'{}'".format(namespace_code))
+
 					skipped_region_codes.add(str(region_code))
 					skipped.add((region_code, region_name, namespace_code, row['seriesCode']))
 				continue
@@ -519,12 +523,9 @@ class RegionDatabase:
 			if isinstance(series_description, str): #checks if None or nan
 				series_json['description'] = series_description
 
-
-			#pprint(series_json)
-			
 			self.addSeries(series_json)
 		print("Imported {} of {} series".format(len(data['series']) - len(skipped), len(data['series'])))
-		db_size = os.path.getsize(self.filename) / 1024**2
+		db_size = self.filesize
 		print("Size of database: {:.2f} MB".format(db_size))
 		print("Finished in ", timer)
 		if verbose:
@@ -593,7 +594,10 @@ class RegionDatabase:
 				series.tags.add(t)
 		return series
 
-	def select(self, entity_type, expression):
-		entity_class = self._getEntityClass(entity_type)
-		result = entity_class.select(expression)
-		return result
+	@property 
+	def filesize(self):
+		if os.path.exists(self.filename):
+			db_size = os.path.getsize(self.filename) / 1024**2
+		else:
+			db_size = 0.0
+		return db_size

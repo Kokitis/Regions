@@ -110,7 +110,7 @@ UN_Geoschemes =  {
     'Eastern Asia': ['CHN', 'TWN', 'HKG', 'JPN', 'MAC', 'MNG', 'PRK', 'PRK'],
     'Southern Asia': ['AFG', 'BGD', 'BTN', 'IND', 'IRN', 'MDV', 'NPL', 'PAK', 'LKA'],
     'Southeastern Asia': [ 'BRN', 'KHM', 'IDN', 'LAO', 'MYS', 'MMR', 'PHL', 'SGP', 'THA', 'TLS', 'VNM'],
-    'Eastern Asia': [
+    'Western Asia': [
         'ARM', 'AZE', 'BHR', 'CYP', 'GEO', 'IRQ', 'ISR', 'JOR', 'KWT', 'LBN', 
         'OMN', 'QAT', 'SAU', 'PSE', 'SYR', 'TUR', 'ARE', 'YEM'
     ],

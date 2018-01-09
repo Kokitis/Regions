@@ -5,3 +5,4 @@ from .addTables import addReport
 from ._region_match import *
 
 from . import comparison
+from ._converters import ConvertTable
