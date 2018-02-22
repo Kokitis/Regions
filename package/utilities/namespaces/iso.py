@@ -1,8 +1,6 @@
 import os
 
 
-from pony.orm import db_session
-
 from ...github import tabletools
 from ._common import namespace_data_folder
 
@@ -16,22 +14,41 @@ def isoParser(row):
 	region_code_num  = row['M49']# "{:>03}".format(row['M49'])
 
 	result = {
-		'regionName': region_name,
+		'name': region_name,
 		'regionType': 'country',
 		'identifiers': [region_code_iso2, region_code_iso3]
 	}
 
 	if str(region_code_num) != 'nan':
 		result['identifiers'].append("{:>03}".format(int(region_code_num)))
+	result['identifiers'] = [i for i in result['identifiers'] if isinstance(i, str)]
+	standard_code = [i for i in result['identifiers'] if (len(i) == 3 and i.isalpha())]
+	if len(standard_code) == 1:
+		standard_code = standard_code[0]
+	else:
+		standard_code = None
+	result['standardCode'] = standard_code
 
 	return result
 
-
-@db_session
-def importIsoNamespace(dataset):
+def importIsoNamespace():
 	""" Imports the identifiers and regions defined in the
 		ISO2, ISO3, and numeric ISO namespace into the provided
 		database.
+		Returns
+		-------
+		dict<>
+		* 'namespace': dict<>
+			* 'code': str
+			* 'name': str
+			* 'subtypes': str
+			* 'regex': str
+			* 'url': str
+		* 'regions': list<dict<>>
+			* 'regionName': str
+			* 'regionCode': str
+			* 'regionType': str
+			* 'identifiers': list<str>
 	"""
 	filename = FILENAME
 
@@ -44,47 +61,16 @@ def importIsoNamespace(dataset):
 		'regex': "(?P<iso2>[A-Z]{2})|(?P<iso3>[A-Z]{3})|(?P<numeric>[0-9]{3})",
 		'url': "https://www.iso.org/iso-3166-country-codes.html",
 	}
-
-	namespace = dataset.access('insert', 'namespace', **iso_namespace)
-
+	iso_regions = list()
 	for index, row in enumerate(table):
-		result = isoParser(row)
-
-		if result is None: 
-			message = "Could not parse the row with index ({})".format(index)
-			print(message)
-			for k, v in sorted(row.items()):
-				print("\t{}:\t{}".format(k, v))
+		region_data = isoParser(row)
+		#pprint(region_data)
+		if not isinstance(region_data['name'], str) or not isinstance(region_data['standardCode'], str):
 			continue
+		iso_regions.append(region_data)
 
-		region_type = result['regionType']
-		region_name = result['regionName']
-		if isinstance(region_name, float) or region_name == 'nan':
-			continue
-
-		region = dataset.getRegion([region_name] + result['identifiers'], namespace)
-
-		if region is None:
-			region = dataset.access('insert', 'region', name = region_name, regionType = region_type)
-
-
-		if region is None:
-			message = "Could not create the region: "
-			print(message)
-			print("\t", region_name)
-			print("\t", region_type)
-			continue
-
-
-		for identifier_string in result['identifiers']:
-			_identifier_is_nan = isinstance(identifier_string, float) or str(identifier_string) == 'nan'
-			if identifier_string is None or _identifier_is_nan:
-				continue
-			identifier_config = {
-				'namespace': namespace,
-				'region': region,
-				'value': identifier_string
-			}
-
-			dataset.access('insert', 'identifier', **identifier_config)
-	return namespace
+	namespace_data = {
+		'namespace': iso_namespace,
+		'regions': iso_regions
+	}
+	return namespace_data

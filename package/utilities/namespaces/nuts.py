@@ -1,19 +1,20 @@
 
 from pony.orm import db_session
 
-from ...utilities import getDefinition
 from ...github import tabletools
+from ...data import configuration
 
 
 @db_session
-def importNutsNamespace(dataset): 
+def importNutsNamespace(dataset):
+	nuts_filename = configuration.files['NUTS']
 	table = tabletools.Table(
-		getDefinition('namespace', 'NUTS'),
+		nuts_filename,
 		sheetname = "NUTS2013-NUTS2016", 
 		skiprows = 1
 	)
 	
-	namespace = getDefinition('namespace', 'NUTS')
+	namespace = configuration.namespaces["Classification of Territorial Units for Statistics"]
 	namespace = dataset.insertEntity('namespace', **namespace)
 
 	current_regions = dict()

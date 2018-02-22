@@ -1,0 +1,40 @@
+{
+    "agency": {
+        "agencyAddress": "700 19th Street, N.W., Washington, D.C. 20431|1900 Pennsylvania Ave NW, Washington, DC, 20431",
+        "agencyCode": "IMF",
+        "agencyName": "International Monetary Fund",
+        "agencyUrl": "http://www.imf.org/external/index.htm|http://www.imf.org/en/data"
+    },
+    "blacklist": [
+        "NGDP_RPCH",
+        "NGDP_R",
+        "NGDP_D",
+        "PPPSH",
+        "NID_NGDP",
+        "NGSD_NGDP",
+        "PCPI",
+        "PCPIPCH",
+        "PCPIE",
+        "PCPIEPCH",
+        "GGSB",
+        "GGSB_NPGDP",
+        "GGXONLB",
+        "GGXONLB_NGDP",
+        "BCA",
+        "BCA_NGDPD",
+        "FLIBOR6"
+    ],
+    "jsonCompatible": false,
+    "namespace": "ISO",
+    "report": {
+        "reportCode": "2017B",
+        "reportDate": "April 2017",
+        "reportName": "World Economic Outlook, April 2017",
+        "reportUrl": "http://www.imf.org/en/Publications/WEO/Issues/2017/04/04/world-economic-outlook-april-2017"
+    },
+    "seriesTagMap": {
+        "LP": [
+            "POP"
+        ]
+    }
+}

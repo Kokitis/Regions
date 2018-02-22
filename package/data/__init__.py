@@ -1,1 +1,1 @@
-from .definitions import *
+from .configuration import *
