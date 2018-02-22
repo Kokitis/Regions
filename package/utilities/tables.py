@@ -1,5 +1,13 @@
-from .validation import isNumber, parseKeywords
-
+from .validation import parseKeywords
+def isNumber(value):
+	""" Checks if a value is a numeric type or if all characters in the string are digits.
+		Parameters
+		----------
+			value: int, float, str
+	"""
+	is_numeric_type = isinstance(value, (int, float))
+	is_all_digit = is_numeric_type or (isinstance(value, str) and value.isdigit())
+	return is_all_digit
 def separateTableColumns(columns):
 	""" Separates a list of columns into 'years' and 'other'
 		Parameters
@@ -120,6 +128,14 @@ def getRequiredColumns(table_columns, **kwargs):
 
 	)
 
+	series_tag_column = parseKeywords(
+		table_columns,
+		[
+			'seriesTags', 'subjectTags', 'tags'
+		],
+		return_type = 'column'
+	)
+
 	result = {
 		'regionCodeColumn': region_code_column,
 		'regionNameColumn': region_name_column,
@@ -129,7 +145,8 @@ def getRequiredColumns(table_columns, **kwargs):
 		'seriesScaleColumn': series_scale_column,
 		'seriesUnitNameColumn': series_unit_name_column,
 		'seriesUnitCodeColumn': series_unit_code_column,
-		'seriesDescriptionColumn': series_description_column
+		'seriesDescriptionColumn': series_description_column,
+		'seriesTagColumn': series_tag_column
 	}
 
 	return result

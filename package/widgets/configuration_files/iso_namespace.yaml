@@ -1,0 +1,1769 @@
+namespace:
+    code: ISO
+    name: International Organization for Standardization
+    regex: (?P<iso2>[A-Z]{2})|(?P<iso3>[A-Z]{3})|(?P<numeric>[0-9]{3})
+    subtypes: iso2|iso3|numeric
+    url: https://www.iso.org/iso-3166-country-codes.html
+regions:
+-   code: AFG
+    identifiers:
+    - AF
+    - AFG
+    - '004'
+    name: Afghanistan
+    type: country
+-   code: ALB
+    identifiers:
+    - AL
+    - ALB
+    - 008
+    name: Albania
+    type: country
+-   code: DZA
+    identifiers:
+    - DZ
+    - DZA
+    - '012'
+    name: Algeria
+    type: country
+-   code: ASM
+    identifiers:
+    - AS
+    - ASM
+    - '016'
+    name: American Samoa
+    type: country
+-   code: AND
+    identifiers:
+    - AD
+    - AND
+    - '020'
+    name: Andorra
+    type: country
+-   code: AGO
+    identifiers:
+    - AO
+    - AGO
+    - '024'
+    name: Angola
+    type: country
+-   code: AIA
+    identifiers:
+    - AI
+    - AIA
+    - '660'
+    name: Anguilla
+    type: country
+-   code: ATA
+    identifiers:
+    - AQ
+    - ATA
+    - '010'
+    name: Antarctica
+    type: country
+-   code: ATG
+    identifiers:
+    - AG
+    - ATG
+    - 028
+    name: Antigua and Barbuda
+    type: country
+-   code: ARG
+    identifiers:
+    - AR
+    - ARG
+    - '032'
+    name: Argentina
+    type: country
+-   code: ARM
+    identifiers:
+    - AM
+    - ARM
+    - '051'
+    name: Armenia
+    type: country
+-   code: ABW
+    identifiers:
+    - AW
+    - ABW
+    - '533'
+    name: Aruba
+    type: country
+-   code: AUS
+    identifiers:
+    - AU
+    - AUS
+    - '036'
+    name: Australia
+    type: country
+-   code: AUT
+    identifiers:
+    - AT
+    - AUT
+    - '040'
+    name: Austria
+    type: country
+-   code: AZE
+    identifiers:
+    - AZ
+    - AZE
+    - '031'
+    name: Azerbaijan
+    type: country
+-   code: BHS
+    identifiers:
+    - BS
+    - BHS
+    - '044'
+    name: Bahamas
+    type: country
+-   code: BHR
+    identifiers:
+    - BH
+    - BHR
+    - 048
+    name: Bahrain
+    type: country
+-   code: BGD
+    identifiers:
+    - BD
+    - BGD
+    - '050'
+    name: Bangladesh
+    type: country
+-   code: BRB
+    identifiers:
+    - BB
+    - BRB
+    - '052'
+    name: Barbados
+    type: country
+-   code: BLR
+    identifiers:
+    - BY
+    - BLR
+    - '112'
+    name: Belarus
+    type: country
+-   code: BEL
+    identifiers:
+    - BE
+    - BEL
+    - '056'
+    name: Belgium
+    type: country
+-   code: BLZ
+    identifiers:
+    - BZ
+    - BLZ
+    - 084
+    name: Belize
+    type: country
+-   code: BEN
+    identifiers:
+    - BJ
+    - BEN
+    - '204'
+    name: Benin
+    type: country
+-   code: BMU
+    identifiers:
+    - BM
+    - BMU
+    - '060'
+    name: Bermuda
+    type: country
+-   code: BTN
+    identifiers:
+    - BT
+    - BTN
+    - '064'
+    name: Bhutan
+    type: country
+-   code: BOL
+    identifiers:
+    - BO
+    - BOL
+    - 068
+    name: Bolivia (Plurinational State of)
+    type: country
+-   code: BIH
+    identifiers:
+    - BA
+    - BIH
+    - '070'
+    name: Bosnia and Herzegovina
+    type: country
+-   code: BWA
+    identifiers:
+    - BW
+    - BWA
+    - '072'
+    name: Botswana
+    type: country
+-   code: BVT
+    identifiers:
+    - BV
+    - BVT
+    - '074'
+    name: Bouvet Island
+    type: country
+-   code: BRA
+    identifiers:
+    - BR
+    - BRA
+    - '076'
+    name: Brazil
+    type: country
+-   code: IOT
+    identifiers:
+    - IO
+    - IOT
+    - 086
+    name: British Indian Ocean Territory
+    type: country
+-   code: VGB
+    identifiers:
+    - VG
+    - VGB
+    - 092
+    name: British Virgin Islands
+    type: country
+-   code: BRN
+    identifiers:
+    - BN
+    - BRN
+    - 096
+    name: Brunei Darussalam
+    type: country
+-   code: BGR
+    identifiers:
+    - BG
+    - BGR
+    - '100'
+    name: Bulgaria
+    type: country
+-   code: BFA
+    identifiers:
+    - BF
+    - BFA
+    - '854'
+    name: Burkina Faso
+    type: country
+-   code: BDI
+    identifiers:
+    - BI
+    - BDI
+    - '108'
+    name: Burundi
+    type: country
+-   code: KHM
+    identifiers:
+    - KH
+    - KHM
+    - '116'
+    name: Cambodia
+    type: country
+-   code: CMR
+    identifiers:
+    - CM
+    - CMR
+    - '120'
+    name: Cameroon
+    type: country
+-   code: CAN
+    identifiers:
+    - CA
+    - CAN
+    - '124'
+    name: Canada
+    type: country
+-   code: CPV
+    identifiers:
+    - CV
+    - CPV
+    - '132'
+    name: Cabo Verde
+    type: country
+-   code: BES
+    identifiers:
+    - BQ
+    - BES
+    - '535'
+    name: Bonaire, Sint Eustatius and Saba
+    type: country
+-   code: CYM
+    identifiers:
+    - KY
+    - CYM
+    - '136'
+    name: Cayman Islands
+    type: country
+-   code: CAF
+    identifiers:
+    - CF
+    - CAF
+    - '140'
+    name: Central African Republic
+    type: country
+-   code: TCD
+    identifiers:
+    - TD
+    - TCD
+    - '148'
+    name: Chad
+    type: country
+-   code: CHL
+    identifiers:
+    - CL
+    - CHL
+    - '152'
+    name: Chile
+    type: country
+-   code: CHN
+    identifiers:
+    - CN
+    - CHN
+    - '156'
+    name: China
+    type: country
+-   code: CCK
+    identifiers:
+    - CC
+    - CCK
+    - '166'
+    name: Cocos (Keeling) Islands
+    type: country
+-   code: COL
+    identifiers:
+    - CO
+    - COL
+    - '170'
+    name: Colombia
+    type: country
+-   code: COM
+    identifiers:
+    - KM
+    - COM
+    - '174'
+    name: Comoros
+    type: country
+-   code: COG
+    identifiers:
+    - CG
+    - COG
+    - '178'
+    name: Congo
+    type: country
+-   code: COD
+    identifiers:
+    - CD
+    - COD
+    - '180'
+    name: Democratic Republic of the Congo
+    type: country
+-   code: COK
+    identifiers:
+    - CK
+    - COK
+    - '184'
+    name: Cook Islands
+    type: country
+-   code: CRI
+    identifiers:
+    - CR
+    - CRI
+    - '188'
+    name: Costa Rica
+    type: country
+-   code: HRV
+    identifiers:
+    - HR
+    - HRV
+    - '191'
+    name: Croatia
+    type: country
+-   code: CUB
+    identifiers:
+    - CU
+    - CUB
+    - '192'
+    name: Cuba
+    type: country
+-   code: CUW
+    identifiers:
+    - CW
+    - CUW
+    - '531'
+    name: "Cura\xE7ao"
+    type: country
+-   code: CYP
+    identifiers:
+    - CY
+    - CYP
+    - '196'
+    name: Cyprus
+    type: country
+-   code: CZE
+    identifiers:
+    - CZ
+    - CZE
+    - '203'
+    name: Czechia
+    type: country
+-   code: CIV
+    identifiers:
+    - CI
+    - CIV
+    - '384'
+    name: "C\xF4te d'Ivoire"
+    type: country
+-   code: DNK
+    identifiers:
+    - DK
+    - DNK
+    - '208'
+    name: Denmark
+    type: country
+-   code: DJI
+    identifiers:
+    - DJ
+    - DJI
+    - '262'
+    name: Djibouti
+    type: country
+-   code: DMA
+    identifiers:
+    - DM
+    - DMA
+    - '212'
+    name: Dominica
+    type: country
+-   code: DOM
+    identifiers:
+    - DO
+    - DOM
+    - '214'
+    name: Dominican Republic
+    type: country
+-   code: ECU
+    identifiers:
+    - EC
+    - ECU
+    - '218'
+    name: Ecuador
+    type: country
+-   code: EGY
+    identifiers:
+    - EG
+    - EGY
+    - '818'
+    name: Egypt
+    type: country
+-   code: SLV
+    identifiers:
+    - SV
+    - SLV
+    - '222'
+    name: El Salvador
+    type: country
+-   code: GNQ
+    identifiers:
+    - GQ
+    - GNQ
+    - '226'
+    name: Equatorial Guinea
+    type: country
+-   code: ERI
+    identifiers:
+    - ER
+    - ERI
+    - '232'
+    name: Eritrea
+    type: country
+-   code: EST
+    identifiers:
+    - EE
+    - EST
+    - '233'
+    name: Estonia
+    type: country
+-   code: ETH
+    identifiers:
+    - ET
+    - ETH
+    - '231'
+    name: Ethiopia
+    type: country
+-   code: FLK
+    identifiers:
+    - FK
+    - FLK
+    - '238'
+    name: Falkland Islands (Malvinas)
+    type: country
+-   code: FRO
+    identifiers:
+    - FO
+    - FRO
+    - '234'
+    name: Faeroe Islands
+    type: country
+-   code: FJI
+    identifiers:
+    - FJ
+    - FJI
+    - '242'
+    name: Fiji
+    type: country
+-   code: FIN
+    identifiers:
+    - FI
+    - FIN
+    - '246'
+    name: Finland
+    type: country
+-   code: FRA
+    identifiers:
+    - FR
+    - FRA
+    - '250'
+    name: France
+    type: country
+-   code: GUF
+    identifiers:
+    - GF
+    - GUF
+    - '254'
+    name: French Guiana
+    type: country
+-   code: PYF
+    identifiers:
+    - PF
+    - PYF
+    - '258'
+    name: French Polynesia
+    type: country
+-   code: ATF
+    identifiers:
+    - TF
+    - ATF
+    - '260'
+    name: French Southern Territories
+    type: country
+-   code: GAB
+    identifiers:
+    - GA
+    - GAB
+    - '266'
+    name: Gabon
+    type: country
+-   code: GMB
+    identifiers:
+    - GM
+    - GMB
+    - '270'
+    name: Gambia
+    type: country
+-   code: GEO
+    identifiers:
+    - GE
+    - GEO
+    - '268'
+    name: Georgia
+    type: country
+-   code: DEU
+    identifiers:
+    - DE
+    - DEU
+    - '276'
+    name: Germany
+    type: country
+-   code: GHA
+    identifiers:
+    - GH
+    - GHA
+    - '288'
+    name: Ghana
+    type: country
+-   code: GIB
+    identifiers:
+    - GI
+    - GIB
+    - '292'
+    name: Gibraltar
+    type: country
+-   code: GRC
+    identifiers:
+    - GR
+    - GRC
+    - '300'
+    name: Greece
+    type: country
+-   code: GRL
+    identifiers:
+    - GL
+    - GRL
+    - '304'
+    name: Greenland
+    type: country
+-   code: GRD
+    identifiers:
+    - GD
+    - GRD
+    - '308'
+    name: Grenada
+    type: country
+-   code: GLP
+    identifiers:
+    - GP
+    - GLP
+    - '312'
+    name: Guadeloupe
+    type: country
+-   code: GUM
+    identifiers:
+    - GU
+    - GUM
+    - '316'
+    name: Guam
+    type: country
+-   code: GTM
+    identifiers:
+    - GT
+    - GTM
+    - '320'
+    name: Guatemala
+    type: country
+-   code: GGY
+    identifiers:
+    - GG
+    - GGY
+    - '831'
+    name: Guernsey
+    type: country
+-   code: GIN
+    identifiers:
+    - GN
+    - GIN
+    - '324'
+    name: Guinea
+    type: country
+-   code: GNB
+    identifiers:
+    - GW
+    - GNB
+    - '624'
+    name: Guinea-Bissau
+    type: country
+-   code: GUY
+    identifiers:
+    - GY
+    - GUY
+    - '328'
+    name: Guyana
+    type: country
+-   code: HTI
+    identifiers:
+    - HT
+    - HTI
+    - '332'
+    name: Haiti
+    type: country
+-   code: HMD
+    identifiers:
+    - HM
+    - HMD
+    - '334'
+    name: Heard & McDonald Islands
+    type: country
+-   code: HND
+    identifiers:
+    - HN
+    - HND
+    - '340'
+    name: Honduras
+    type: country
+-   code: HKG
+    identifiers:
+    - HK
+    - HKG
+    - '344'
+    name: China, Hong Kong Special Administrative Region
+    type: country
+-   code: HUN
+    identifiers:
+    - HU
+    - HUN
+    - '348'
+    name: Hungary
+    type: country
+-   code: ISL
+    identifiers:
+    - IS
+    - ISL
+    - '352'
+    name: Iceland
+    type: country
+-   code: IND
+    identifiers:
+    - IN
+    - IND
+    - '356'
+    name: India
+    type: country
+-   code: IDN
+    identifiers:
+    - ID
+    - IDN
+    - '360'
+    name: Indonesia
+    type: country
+-   code: IRN
+    identifiers:
+    - IR
+    - IRN
+    - '364'
+    name: Iran (Islamic Republic of)
+    type: country
+-   code: IRQ
+    identifiers:
+    - IQ
+    - IRQ
+    - '368'
+    name: Iraq
+    type: country
+-   code: IRL
+    identifiers:
+    - IE
+    - IRL
+    - '372'
+    name: Ireland
+    type: country
+-   code: IMN
+    identifiers:
+    - IM
+    - IMN
+    - '833'
+    name: Isle of Man
+    type: country
+-   code: ISR
+    identifiers:
+    - IL
+    - ISR
+    - '376'
+    name: Israel
+    type: country
+-   code: ITA
+    identifiers:
+    - IT
+    - ITA
+    - '380'
+    name: Italy
+    type: country
+-   code: JAM
+    identifiers:
+    - JM
+    - JAM
+    - '388'
+    name: Jamaica
+    type: country
+-   code: JPN
+    identifiers:
+    - JP
+    - JPN
+    - '392'
+    name: Japan
+    type: country
+-   code: JEY
+    identifiers:
+    - JE
+    - JEY
+    - '832'
+    name: Jersey
+    type: country
+-   code: JOR
+    identifiers:
+    - JO
+    - JOR
+    - '400'
+    name: Jordan
+    type: country
+-   code: KAZ
+    identifiers:
+    - KZ
+    - KAZ
+    - '398'
+    name: Kazakhstan
+    type: country
+-   code: KEN
+    identifiers:
+    - KE
+    - KEN
+    - '404'
+    name: Kenya
+    type: country
+-   code: KIR
+    identifiers:
+    - KI
+    - KIR
+    - '296'
+    name: Kiribati
+    type: country
+-   code: UVK
+    identifiers:
+    - XK
+    - UVK
+    name: Kosovo
+    type: country
+-   code: KWT
+    identifiers:
+    - KW
+    - KWT
+    - '414'
+    name: Kuwait
+    type: country
+-   code: KGZ
+    identifiers:
+    - KG
+    - KGZ
+    - '417'
+    name: Kyrgyzstan
+    type: country
+-   code: LAO
+    identifiers:
+    - LA
+    - LAO
+    - '418'
+    name: Lao People's Democratic Republic
+    type: country
+-   code: LVA
+    identifiers:
+    - LV
+    - LVA
+    - '428'
+    name: Latvia
+    type: country
+-   code: LBN
+    identifiers:
+    - LB
+    - LBN
+    - '422'
+    name: Lebanon
+    type: country
+-   code: LSO
+    identifiers:
+    - LS
+    - LSO
+    - '426'
+    name: Lesotho
+    type: country
+-   code: LBR
+    identifiers:
+    - LR
+    - LBR
+    - '430'
+    name: Liberia
+    type: country
+-   code: LBY
+    identifiers:
+    - LY
+    - LBY
+    - '434'
+    name: Libya
+    type: country
+-   code: LIE
+    identifiers:
+    - LI
+    - LIE
+    - '438'
+    name: Liechtenstein
+    type: country
+-   code: LTU
+    identifiers:
+    - LT
+    - LTU
+    - '440'
+    name: Lithuania
+    type: country
+-   code: LUX
+    identifiers:
+    - LU
+    - LUX
+    - '442'
+    name: Luxembourg
+    type: country
+-   code: MAC
+    identifiers:
+    - MO
+    - MAC
+    - '446'
+    name: China, Macao Special Administrative Region
+    type: country
+-   code: MKD
+    identifiers:
+    - MK
+    - MKD
+    - '807'
+    name: The former Yugoslav Republic of Macedonia
+    type: country
+-   code: MDG
+    identifiers:
+    - MG
+    - MDG
+    - '450'
+    name: Madagascar
+    type: country
+-   code: MWI
+    identifiers:
+    - MW
+    - MWI
+    - '454'
+    name: Malawi
+    type: country
+-   code: MYS
+    identifiers:
+    - MY
+    - MYS
+    - '458'
+    name: Malaysia
+    type: country
+-   code: MDV
+    identifiers:
+    - MV
+    - MDV
+    - '462'
+    name: Maldives
+    type: country
+-   code: MLI
+    identifiers:
+    - ML
+    - MLI
+    - '466'
+    name: Mali
+    type: country
+-   code: MLT
+    identifiers:
+    - MT
+    - MLT
+    - '470'
+    name: Malta
+    type: country
+-   code: MHL
+    identifiers:
+    - MH
+    - MHL
+    - '584'
+    name: Marshall Islands
+    type: country
+-   code: MTQ
+    identifiers:
+    - MQ
+    - MTQ
+    - '474'
+    name: Martinique
+    type: country
+-   code: MRT
+    identifiers:
+    - MR
+    - MRT
+    - '478'
+    name: Mauritania
+    type: country
+-   code: MUS
+    identifiers:
+    - MU
+    - MUS
+    - '480'
+    name: Mauritius
+    type: country
+-   code: MYT
+    identifiers:
+    - YT
+    - MYT
+    - '175'
+    name: Mayotte
+    type: country
+-   code: MEX
+    identifiers:
+    - MX
+    - MEX
+    - '484'
+    name: Mexico
+    type: country
+-   code: FSM
+    identifiers:
+    - FM
+    - FSM
+    - '583'
+    name: Micronesia (Federated States of)
+    type: country
+-   code: MDA
+    identifiers:
+    - MD
+    - MDA
+    - '498'
+    name: Republic of Moldova
+    type: country
+-   code: MCO
+    identifiers:
+    - MC
+    - MCO
+    - '492'
+    name: Monaco
+    type: country
+-   code: MNG
+    identifiers:
+    - MN
+    - MNG
+    - '496'
+    name: Mongolia
+    type: country
+-   code: MNE
+    identifiers:
+    - ME
+    - MNE
+    - '499'
+    name: Montenegro
+    type: country
+-   code: MSR
+    identifiers:
+    - MS
+    - MSR
+    - '500'
+    name: Montserrat
+    type: country
+-   code: MAR
+    identifiers:
+    - MA
+    - MAR
+    - '504'
+    name: Morocco
+    type: country
+-   code: MOZ
+    identifiers:
+    - MZ
+    - MOZ
+    - '508'
+    name: Mozambique
+    type: country
+-   code: MMR
+    identifiers:
+    - MM
+    - MMR
+    - '104'
+    name: Myanmar
+    type: country
+-   code: NAM
+    identifiers:
+    - NAM
+    - '516'
+    name: Namibia
+    type: country
+-   code: NRU
+    identifiers:
+    - NR
+    - NRU
+    - '520'
+    name: Nauru
+    type: country
+-   code: NPL
+    identifiers:
+    - NP
+    - NPL
+    - '524'
+    name: Nepal
+    type: country
+-   code: NLD
+    identifiers:
+    - NL
+    - NLD
+    - '528'
+    name: Netherlands
+    type: country
+-   code: NCL
+    identifiers:
+    - NC
+    - NCL
+    - '540'
+    name: New Caledonia
+    type: country
+-   code: NZL
+    identifiers:
+    - NZ
+    - NZL
+    - '554'
+    name: New Zealand
+    type: country
+-   code: NIC
+    identifiers:
+    - NI
+    - NIC
+    - '558'
+    name: Nicaragua
+    type: country
+-   code: NER
+    identifiers:
+    - NE
+    - NER
+    - '562'
+    name: Niger
+    type: country
+-   code: NGA
+    identifiers:
+    - NG
+    - NGA
+    - '566'
+    name: Nigeria
+    type: country
+-   code: NIU
+    identifiers:
+    - NU
+    - NIU
+    - '570'
+    name: Niue
+    type: country
+-   code: NFK
+    identifiers:
+    - NF
+    - NFK
+    - '574'
+    name: Norfolk Island
+    type: country
+-   code: PRK
+    identifiers:
+    - KP
+    - PRK
+    - '408'
+    name: Democratic People's Republic of Korea
+    type: country
+-   code: MNP
+    identifiers:
+    - MP
+    - MNP
+    - '580'
+    name: Northern Mariana Islands
+    type: country
+-   code: NOR
+    identifiers:
+    - 'NO'
+    - NOR
+    - '578'
+    name: Norway
+    type: country
+-   code: OMN
+    identifiers:
+    - OM
+    - OMN
+    - '512'
+    name: Oman
+    type: country
+-   code: PAK
+    identifiers:
+    - PK
+    - PAK
+    - '586'
+    name: Pakistan
+    type: country
+-   code: PLW
+    identifiers:
+    - PW
+    - PLW
+    - '585'
+    name: Palau
+    type: country
+-   code: PSE
+    identifiers:
+    - PS
+    - PSE
+    - '275'
+    name: State of Palestine
+    type: country
+-   code: PAN
+    identifiers:
+    - PA
+    - PAN
+    - '591'
+    name: Panama
+    type: country
+-   code: PNG
+    identifiers:
+    - PG
+    - PNG
+    - '598'
+    name: Papua New Guinea
+    type: country
+-   code: PRY
+    identifiers:
+    - PY
+    - PRY
+    - '600'
+    name: Paraguay
+    type: country
+-   code: PER
+    identifiers:
+    - PE
+    - PER
+    - '604'
+    name: Peru
+    type: country
+-   code: PHL
+    identifiers:
+    - PH
+    - PHL
+    - '608'
+    name: Philippines
+    type: country
+-   code: PCN
+    identifiers:
+    - PN
+    - PCN
+    - '612'
+    name: Pitcairn
+    type: country
+-   code: POL
+    identifiers:
+    - PL
+    - POL
+    - '616'
+    name: Poland
+    type: country
+-   code: PRT
+    identifiers:
+    - PT
+    - PRT
+    - '620'
+    name: Portugal
+    type: country
+-   code: PRI
+    identifiers:
+    - PR
+    - PRI
+    - '630'
+    name: Puerto Rico
+    type: country
+-   code: QAT
+    identifiers:
+    - QA
+    - QAT
+    - '634'
+    name: Qatar
+    type: country
+-   code: ROU
+    identifiers:
+    - RO
+    - ROU
+    - '642'
+    name: Romania
+    type: country
+-   code: RUS
+    identifiers:
+    - RU
+    - RUS
+    - '643'
+    name: Russian Federation
+    type: country
+-   code: RWA
+    identifiers:
+    - RW
+    - RWA
+    - '646'
+    name: Rwanda
+    type: country
+-   code: REU
+    identifiers:
+    - RE
+    - REU
+    - '638'
+    name: "R\xE9union"
+    type: country
+-   code: WSM
+    identifiers:
+    - WS
+    - WSM
+    - '882'
+    name: Samoa
+    type: country
+-   code: SMR
+    identifiers:
+    - SM
+    - SMR
+    - '674'
+    name: San Marino
+    type: country
+-   code: SAU
+    identifiers:
+    - SA
+    - SAU
+    - '682'
+    name: Saudi Arabia
+    type: country
+-   code: SEN
+    identifiers:
+    - SN
+    - SEN
+    - '686'
+    name: Senegal
+    type: country
+-   code: SRB
+    identifiers:
+    - RS
+    - SRB
+    - '688'
+    name: Serbia
+    type: country
+-   code: SYC
+    identifiers:
+    - SC
+    - SYC
+    - '690'
+    name: Seychelles
+    type: country
+-   code: SLE
+    identifiers:
+    - SL
+    - SLE
+    - '694'
+    name: Sierra Leone
+    type: country
+-   code: SGP
+    identifiers:
+    - SG
+    - SGP
+    - '702'
+    name: Singapore
+    type: country
+-   code: SXM
+    identifiers:
+    - SX
+    - SXM
+    - '534'
+    name: Sint Maarten (Dutch part)
+    type: country
+-   code: SVK
+    identifiers:
+    - SK
+    - SVK
+    - '703'
+    name: Slovakia
+    type: country
+-   code: SVN
+    identifiers:
+    - SI
+    - SVN
+    - '705'
+    name: Slovenia
+    type: country
+-   code: SLB
+    identifiers:
+    - SB
+    - SLB
+    - 090
+    name: Solomon Islands
+    type: country
+-   code: SOM
+    identifiers:
+    - SO
+    - SOM
+    - '706'
+    name: Somalia
+    type: country
+-   code: ZAF
+    identifiers:
+    - ZA
+    - ZAF
+    - '710'
+    name: South Africa
+    type: country
+-   code: SGS
+    identifiers:
+    - GS
+    - SGS
+    - '239'
+    name: South Georgia & South Sandwich Islands
+    type: country
+-   code: KOR
+    identifiers:
+    - KR
+    - KOR
+    - '410'
+    name: Republic of Korea
+    type: country
+-   code: SSD
+    identifiers:
+    - SS
+    - SSD
+    - '728'
+    name: South Sudan
+    type: country
+-   code: ESP
+    identifiers:
+    - ES
+    - ESP
+    - '724'
+    name: Spain
+    type: country
+-   code: LKA
+    identifiers:
+    - LK
+    - LKA
+    - '144'
+    name: Sri Lanka
+    type: country
+-   code: BLM
+    identifiers:
+    - BL
+    - BLM
+    - '652'
+    name: "Saint Barth\xE9lemy"
+    type: country
+-   code: SHN
+    identifiers:
+    - SH
+    - SHN
+    - '654'
+    name: Saint Helena
+    type: country
+-   code: KNA
+    identifiers:
+    - KN
+    - KNA
+    - '659'
+    name: Saint Kitts and Nevis
+    type: country
+-   code: LCA
+    identifiers:
+    - LC
+    - LCA
+    - '662'
+    name: Saint Lucia
+    type: country
+-   code: MAF
+    identifiers:
+    - MF
+    - MAF
+    - '663'
+    name: Saint Martin (French part)
+    type: country
+-   code: SPM
+    identifiers:
+    - PM
+    - SPM
+    - '666'
+    name: Saint Pierre and Miquelon
+    type: country
+-   code: VCT
+    identifiers:
+    - VC
+    - VCT
+    - '670'
+    name: Saint Vincent and the Grenadines
+    type: country
+-   code: SDN
+    identifiers:
+    - SD
+    - SDN
+    - '729'
+    name: Sudan
+    type: country
+-   code: SUR
+    identifiers:
+    - SR
+    - SUR
+    - '740'
+    name: Suriname
+    type: country
+-   code: SJM
+    identifiers:
+    - SJ
+    - SJM
+    - '744'
+    name: Svalbard and Jan Mayen Islands
+    type: country
+-   code: SWZ
+    identifiers:
+    - SZ
+    - SWZ
+    - '748'
+    name: Swaziland
+    type: country
+-   code: SWE
+    identifiers:
+    - SE
+    - SWE
+    - '752'
+    name: Sweden
+    type: country
+-   code: CHE
+    identifiers:
+    - CH
+    - CHE
+    - '756'
+    name: Switzerland
+    type: country
+-   code: SYR
+    identifiers:
+    - SY
+    - SYR
+    - '760'
+    name: Syrian Arab Republic
+    type: country
+-   code: STP
+    identifiers:
+    - ST
+    - STP
+    - '678'
+    name: Sao Tome and Principe
+    type: country
+-   code: TWN
+    identifiers:
+    - TW
+    - TWN
+    - '158'
+    name: Taiwan
+    type: country
+-   code: TJK
+    identifiers:
+    - TJ
+    - TJK
+    - '762'
+    name: Tajikistan
+    type: country
+-   code: TZA
+    identifiers:
+    - TZ
+    - TZA
+    - '834'
+    name: United Republic of Tanzania
+    type: country
+-   code: THA
+    identifiers:
+    - TH
+    - THA
+    - '764'
+    name: Thailand
+    type: country
+-   code: TLS
+    identifiers:
+    - TL
+    - TLS
+    - '626'
+    name: Timor-Leste
+    type: country
+-   code: TGO
+    identifiers:
+    - TG
+    - TGO
+    - '768'
+    name: Togo
+    type: country
+-   code: TKL
+    identifiers:
+    - TK
+    - TKL
+    - '772'
+    name: Tokelau
+    type: country
+-   code: TON
+    identifiers:
+    - TO
+    - TON
+    - '776'
+    name: Tonga
+    type: country
+-   code: TTO
+    identifiers:
+    - TT
+    - TTO
+    - '780'
+    name: Trinidad and Tobago
+    type: country
+-   code: TUN
+    identifiers:
+    - TN
+    - TUN
+    - '788'
+    name: Tunisia
+    type: country
+-   code: TUR
+    identifiers:
+    - TR
+    - TUR
+    - '792'
+    name: Turkey
+    type: country
+-   code: TKM
+    identifiers:
+    - TM
+    - TKM
+    - '795'
+    name: Turkmenistan
+    type: country
+-   code: TCA
+    identifiers:
+    - TC
+    - TCA
+    - '796'
+    name: Turks and Caicos Islands
+    type: country
+-   code: TUV
+    identifiers:
+    - TV
+    - TUV
+    - '798'
+    name: Tuvalu
+    type: country
+-   code: UMI
+    identifiers:
+    - UM
+    - UMI
+    - '581'
+    name: U.S. Outlying Islands
+    type: country
+-   code: VIR
+    identifiers:
+    - VI
+    - VIR
+    - '850'
+    name: United States Virgin Islands
+    type: country
+-   code: GBR
+    identifiers:
+    - GB
+    - GBR
+    - '826'
+    name: United Kingdom of Great Britain and Northern Ireland
+    type: country
+-   code: USA
+    identifiers:
+    - US
+    - USA
+    - '840'
+    name: United States of America
+    type: country
+-   code: UGA
+    identifiers:
+    - UG
+    - UGA
+    - '800'
+    name: Uganda
+    type: country
+-   code: UKR
+    identifiers:
+    - UA
+    - UKR
+    - '804'
+    name: Ukraine
+    type: country
+-   code: ARE
+    identifiers:
+    - AE
+    - ARE
+    - '784'
+    name: United Arab Emirates
+    type: country
+-   code: URY
+    identifiers:
+    - UY
+    - URY
+    - '858'
+    name: Uruguay
+    type: country
+-   code: UZB
+    identifiers:
+    - UZ
+    - UZB
+    - '860'
+    name: Uzbekistan
+    type: country
+-   code: VUT
+    identifiers:
+    - VU
+    - VUT
+    - '548'
+    name: Vanuatu
+    type: country
+-   code: VAT
+    identifiers:
+    - VA
+    - VAT
+    - '336'
+    name: Holy See
+    type: country
+-   code: VEN
+    identifiers:
+    - VE
+    - VEN
+    - '862'
+    name: Venezuela (Bolivarian Republic of)
+    type: country
+-   code: VNM
+    identifiers:
+    - VN
+    - VNM
+    - '704'
+    name: Vietnam
+    type: country
+-   code: WLF
+    identifiers:
+    - WF
+    - WLF
+    - '876'
+    name: Wallis and Futuna Islands
+    type: country
+-   code: ESH
+    identifiers:
+    - EH
+    - ESH
+    - '732'
+    name: Western Sahara
+    type: country
+-   code: YEM
+    identifiers:
+    - YE
+    - YEM
+    - '887'
+    name: Yemen
+    type: country
+-   code: ZMB
+    identifiers:
+    - ZM
+    - ZMB
+    - '894'
+    name: Zambia
+    type: country
+-   code: ZWE
+    identifiers:
+    - ZW
+    - ZWE
+    - '716'
+    name: Zimbabwe
+    type: country
+-   code: ALA
+    identifiers:
+    - AX
+    - ALA
+    - '248'
+    name: "\xC5land Islands"
+    type: country
+-   code: EUU
+    identifiers:
+    - EU
+    - EUU
+    - '998'
+    name: European Union
+    type: country
+-   code: EMU
+    identifiers:
+    - EZ
+    - EMU
+    - '163'
+    name: Eurozone
+    type: country
+-   code: CIS
+    identifiers:
+    - CS
+    - CIS
+    - '901'
+    name: Commonwealth of Independent States
+    type: country

@@ -1,0 +1,53 @@
+{
+    "agency": {
+        "address": "902 Broadway, 4th Floor New York, NY 10010",
+        "code": "UN",
+        "name": "United Nations",
+        "url": "http://www.un.org/en/index.html"
+    },
+    "namespace": "ISO",
+    "regionCodeColumn": "regionCode",
+    "regionNameColumn": "Region, subregion, country or area *",
+    "report": {
+        "agency": "United Nations",
+        "code": "WPP2017",
+        "name": "World Population Prospects, The 2017 Revision",
+        "publishDate": "2017-06-21",
+        "url": "https://esa.un.org/unpd/wpp/Download/Standard/Population/"
+    },
+    "seriesCodeColumn": "subjectCode",
+    "seriesDescriptionMap": {
+        "POP.PROJ.CONST.FERT": "Constant-fertility variant, 2015 - 2100|For each country, total fertility remains constant at the level estimated for 1995-2000.",
+        "POP.PROJ.CONST.MORT": "Constant-mortality variant, 2015 - 2100",
+        "POP.PROJ.INST": "Instant-replacement-fertility variant, 2015 - 2100|For each country and each quinquennium of the projection period (2000-2050), total fertility is set to a level that ensures a net reproduction rate of one. That is, total fertility is set to the level that would ensure population replacement in the long run in light of the sex ratio at birth and level of mortality of the country concerned at each particular period.",
+        "POP.PROJ.MAX": "High fertility variant, 2015 - 2100|Total fertility in high and medium-fertility countries remains above the total fertility in the medium-fertility assumption and eventually reaches a value 0.5 children above that reached by total fertility in the mediumfertility assumption in 2045-2050. For low-fertility countries, total fertility eventually reaches a value 0.4 children above that reached by total fertility in the mediumfertility assumption in 2045-2050.",
+        "POP.PROJ.MID": "Medium fertility variant, 2015 - 2100|Total fertility in high-fertility countries is generally assumed to decline at an average pace of nearly one child per decade starting in 2005 or later. Consequently, some of these countries do not reach replacement level by 2050. Total fertility in medium-fertility countries is assumed to reach replacement level before 2050. Total fertility in low-fertility countries is generally assumed to remain below the replacement level during the projection period, reaching by 2045-2050 the total fertility of the cohort of women born in the early 1960s or, if that information is lacking, reaching 1.7 children per woman if current total fertility is below 1.5 children per woman or 1.9 children per woman if current total fertility is equal or higher than 1.5 children per woman.",
+        "POP.PROJ.MIN": "Low fertility variant, 2015 - 2100|Total fertility in high and medium-fertility countries remains below the total fertility in the medium-fertility assumption and eventually reaches a value 0.5 children below that reached by total fertility in the mediumfertility assumption in 2045-2050.  For low-fertility countries, total fertility eventually reaches a value 0.4 children below that  reached by total fertility in the mediumfertility assumption in 2045-2050. ",
+        "POP.PROJ.MOM": "Momentum variant (instant-replacement-fertility, constant-mortality and zero-migration), 2015 - 2100",
+        "POP.PROJ.STATIC": "No change variant (constant-fertility and constant-mortality), 2015 - 2100",
+        "POP.PROJ.ZERO": "Zero-migration variant, 2015 - 2100|For each country, international migration is set to zero for the period 2000-2050."
+    },
+    "seriesNameColumn": "subjectName",
+    "seriesScaleMap": {
+        "POP.PROJ.CONST.FERT": "Persons",
+        "POP.PROJ.CONST.MORT": "Persons",
+        "POP.PROJ.INST": "Persons",
+        "POP.PROJ.MAX": "Persons",
+        "POP.PROJ.MID": "Persons",
+        "POP.PROJ.MIN": "Persons",
+        "POP.PROJ.MOM": "Persons",
+        "POP.PROJ.STATIC": "Persons",
+        "POP.PROJ.ZERO": "Persons"
+    },
+    "seriesUnitMap": {
+        "POP.PROJ.CONST.FERT": "Thousand",
+        "POP.PROJ.CONST.MORT": "Thousand",
+        "POP.PROJ.INST": "Thousand",
+        "POP.PROJ.MAX": "Thousand",
+        "POP.PROJ.MID": "Thousand",
+        "POP.PROJ.MIN": "Thousand",
+        "POP.PROJ.MOM": "Thousand",
+        "POP.PROJ.STATIC": "Thousand",
+        "POP.PROJ.ZERO": "Thousand"
+    }
+}

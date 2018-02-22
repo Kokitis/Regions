@@ -1,14 +1,14 @@
 from ...github import tabletools
-from ...utilities import getDefinition
+from ...data import configuration
 
 def importStateNamespace(dataset):
     identifier_map = dict()
-    filename = getDefinition('file', 'State Codes')
+    filename = configuration.files['State Codes']
 
-    usps_agency = getDefinition('agency', 'USPS')
+    usps_agency = configuration.agencies['USPS']
     dataset.insertEntity('agency', **usps_agency)
 
-    namespace_config = getDefinition('namespace', 'ST')
+    namespace_config = configuration.namespaces['ST']
     namespace = dataset.insertEnity('namespace', **namespace_config)
 
     table = tabletools.Table(filename)
@@ -45,9 +45,9 @@ def importFipsNamespace(dataset):
 
     state_namespace = importStateNamespace(dataset)
     state_map = {i['string']: i['region'] for i in state_namespace.identifiers}
-    filename = getDefinition('file', 'FIPS')
+    filename = configuration.files['FIPS']
 
-    fips_namespace_config = getDefinition('namespace', 'FIPS')
+    fips_namespace_config = configuration.namespaces['FIPS']
     namespace = dataset.insertEntity('namespace', **fips_namespace_config)
 
     table = tabletools.Table(filename) 
