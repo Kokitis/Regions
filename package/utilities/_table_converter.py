@@ -3,7 +3,11 @@ import progressbar
 from package.utilities import tables
 from package.github import tabletools, pprint, timetools, numbertools
 from math import isnan
-from.entity_validation import ValidateApiResponse
+from .entity_validation import ValidateApiResponse
+from typing import List, Union, Dict
+
+Row = tabletools.pandas.Series
+SeriesValues = List[Union[str, timetools.Timestamp], float]
 
 
 class TableApi:
@@ -59,16 +63,16 @@ class TableApi:
 
 		kwargs['jsonCompatible'] = kwargs.get('jsonCompatible', False) or 'saveTo' in kwargs
 		file_kwargs = kwargs.get('tableConfig', dict())
-		namespace_key = kwargs.get('namespace')
-		report = kwargs.get('report')
-		agency = kwargs.get('agency')
+		namespace_key: str = kwargs.get('namespace')
+		report: Dict[str, str] = kwargs.get('report')
+		agency: Dict[str, str] = kwargs.get('agency')
 		assert isinstance(namespace_key, str)
 		assert isinstance(report, dict)
 		assert isinstance(agency, dict)
 
-		report_table = self._openTable(filename, **file_kwargs)
+		report_table: tabletools.Table = self._openTable(filename, **file_kwargs)
 
-		region_list = self._parseTable(report_table, **kwargs)
+		region_list: List[str] = self._parseTable(report_table, **kwargs)
 
 		report_information = {
 			'report':    report,
@@ -86,7 +90,6 @@ class TableApi:
 				file1.write(json.dumps(self.data, indent = 4, sort_keys = True))
 
 		ValidateApiResponse(self.data)
-
 
 	@staticmethod
 	def _openTable(filename, **kwargs):
@@ -244,15 +247,15 @@ class TableApi:
 				region_series.append(current_series)
 
 		region_information = {
-			'regionName':    region_name,
-			'regionCode':    region_code,
+			'regionName':   region_name,
+			'regionCode':   region_code,
 			'regionType':   'country',
 			'regionSeries': region_series
 		}
 
 		return region_information
 
-	def _convertRow(self, row, report_columns, **kwargs):
+	def _convertRow(self, row: Row, report_columns: Dict, **kwargs):
 		""" Converts a row into an importable dict.
 			Parameters
 			----------
@@ -272,16 +275,16 @@ class TableApi:
 					the whitelist will be imported.
 		"""
 		# Confirm that all required components exist.
-		blacklist = kwargs.get('blacklist', [])
-		whitelist = kwargs.get('whitelist', [])
+		blacklist: List[str] = kwargs.get('blacklist', [])
+		whitelist: List[str] = kwargs.get('whitelist', [])
 
 		# Should be static
 		try:
-			region_code = row[report_columns['regionCodeColumn']]  # identifier
-			region_name = row[report_columns['regionNameColumn']]
+			region_code: str = row[report_columns['regionCodeColumn']]  # identifier
+			region_name: str = row[report_columns['regionNameColumn']]
 
-			subject_code = row[report_columns['seriesCodeColumn']]
-			subject_name = row[report_columns['seriesNameColumn']]
+			subject_code: str = row[report_columns['seriesCodeColumn']]
+			subject_name: str = row[report_columns['seriesNameColumn']]
 		except KeyError as exception:
 			error_message = {
 				'exception':        exception,
@@ -295,32 +298,32 @@ class TableApi:
 			pprint(error_message)
 			raise exception
 
-		_in_whitelist = len(whitelist) != 0 or subject_code in whitelist
-		_not_in_blacklist = len(whitelist) == 0 and subject_code not in blacklist
-		use_row = _in_whitelist or _not_in_blacklist
+		_in_whitelist: bool = len(whitelist) != 0 or subject_code in whitelist
+		_not_in_blacklist: bool = len(whitelist) == 0 and subject_code not in blacklist
+		use_row: bool = _in_whitelist or _not_in_blacklist
 
 		if use_row:
 
-			series_code_column = report_columns.get('seriesCodeColumn')
-			series_code = row[series_code_column]
-
-			series_unit_map = report_columns.get('seriesUnitColumn')
+			series_code_column: str = report_columns.get('seriesCodeColumn')
+			series_code: str = row[series_code_column]
+			SeriesMap = Union[str, Dict[str, str]]
+			series_unit_map: SeriesMap = report_columns.get('seriesUnitColumn')
 			if not series_unit_map:
 				series_unit_map = report_columns.get('seriesUnitMap')
 
-			series_scale_map = report_columns.get('seriesScaleColumn')
+			series_scale_map: SeriesMap = report_columns.get('seriesScaleColumn')
 			if not series_scale_map:
 				series_scale_map = report_columns.get('seriesScaleMap')
 
-			series_tag_map = report_columns.get('seriesTagColumn')
+			series_tag_map: SeriesMap = report_columns.get('seriesTagColumn')
 			if not series_tag_map:
 				series_tag_map = report_columns.get('seriesTagMap')
 
-			series_note_map = report_columns.get('seriesNoteColumn')
+			series_note_map: SeriesMap = report_columns.get('seriesNoteColumn')
 			if not series_note_map:
 				series_note_map = report_columns.get('seriesNoteMap')
 
-			series_description_map = report_columns.get('seriesDescriptionColumn')
+			series_description_map: SeriesMap = report_columns.get('seriesDescriptionColumn')
 			if not series_description_map:
 				series_description_map = report_columns.get('seriesDescriptionMap')
 
@@ -339,7 +342,7 @@ class TableApi:
 			if series_notes is None:
 				series_notes = ''
 
-			series_values = self._getValues(row, kwargs['startDay'], kwargs['jsonCompatible'])
+			series_values: SeriesValues = self._getValues(row, kwargs['startDay'], kwargs['jsonCompatible'])
 
 			json_series = {
 				'regionCode':        region_code,
@@ -357,11 +360,10 @@ class TableApi:
 		else:
 			json_series = None
 
-
 		return json_series
 
 	@staticmethod
-	def _getValues(row, start_day, json_compatible):
+	def _getValues(row: Row, start_day: str, json_compatible: bool) -> SeriesValues:
 		""" Dates may take to following formats:
 			* int, float: ex. 2017, 2017.0
 			* str ex. '2017', '2017-03-21'
@@ -385,7 +387,7 @@ class TableApi:
 		return values
 
 	@staticmethod
-	def _getMetadata(row, metadata_map, subject_code, region_code = None):
+	def _getMetadata(row: Row, metadata_map, subject_code, region_code = None):
 		"""
 			Extracts metadata from the row.
 		Parameters
@@ -403,7 +405,6 @@ class TableApi:
 			str
 		"""
 
-
 		if isinstance(metadata_map, str) and metadata_map in row.keys():
 			metadata_value = row[metadata_map]
 		elif isinstance(metadata_map, dict):
@@ -415,9 +416,9 @@ class TableApi:
 		else:
 			error_message = {
 				'parameters': {
-					'metadata_map': metadata_map,
+					'metadata_map':   metadata_map,
 					'subject_column': subject_code,
-					'row': row.keys()
+					'row':            row.keys()
 				}
 			}
 			pprint(error_message)

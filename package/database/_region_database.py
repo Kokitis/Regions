@@ -6,6 +6,7 @@ from pprint import pprint
 from functools import partial
 from ..utilities import ValidateApiResponse, ValidateSqlResponse
 pprint = partial(pprint, width = 180)
+from typing import Dict
 
 from pony.orm import Database, db_session
 import progressbar
@@ -20,19 +21,20 @@ import math
 from texttable import Texttable
 database_folder = os.path.join(configuration.data_directory, "databases")
 
-standard_datasets = {
+standard_datasets:Dict[str,str] = {
 	'europe': os.path.join(database_folder, "eurostat_database.sqlite"),
 	'global': os.path.join(database_folder, "global_database.sqlite"),
 	'test':   os.path.join(database_folder, 'test_database.sqlite')
 }
 
-XY_SEPARATOR = '|'
-POINT_SEPARATOR = '||'
+XY_SEPARATOR:str = '|'
+POINT_SEPARATOR:str = '||'
 
 SQL_ARGUMENT_VALIDATION = ValidateSqlResponse()
+EntityType = 'RegionDatabase._db.Entity'
 
 class RegionDatabase:
-	def __init__(self, filename, create = False, replace = False):
+	def __init__(self, filename:str, create:bool = False, replace:bool = False):
 		"""
 			Parameters
 			----------
@@ -41,9 +43,21 @@ class RegionDatabase:
 		"""
 
 		self.create = create
+
+		self.Agency 	=None
+		self.Identifier =None
+		self.Namespace 	=None
+		self.Region 	=None
+		self.Report 	=None
+		self.Series 	=None
+		self.Tag=None
+		self.Unit =None
+		self.Scale 	=None
+
 		self._main_database = self._initializeDatabase(filename, create, replace)
+
 	@db_session
-	def _getEntityClass(self, entity):
+	def _getEntityClass(self, entity:str):
 		""" Matches an entity string to the corresponding class.
 			Parameters
 			----------
@@ -79,7 +93,7 @@ class RegionDatabase:
 
 		return _class
 
-	def _getFilename(self, string):
+	def _getFilename(self, string:str)->str:
 		if string in standard_datasets:
 			filename = standard_datasets[string]
 		elif string == 'temp' or string == ':memory:':
@@ -90,9 +104,9 @@ class RegionDatabase:
 				filename += '.sqlite'
 		return filename
 
-	def _initializeDatabase(self, _filename, create, replace):
+	def _initializeDatabase(self, _filename:str, create:bool, replace:bool):
 
-		self.filename = self._getFilename(_filename)
+		self.filename:str = self._getFilename(_filename)
 
 		print("Database Filename: ", self.filename)
 		if replace and os.path.exists(self.filename):
@@ -119,7 +133,7 @@ class RegionDatabase:
 		return _database
 
 	@db_session
-	def _insertEntity(self, entity_type, **kwargs):
+	def _insertEntity(self, entity_type:str, **kwargs):
 		""" Inserts an entity into the database. Assumes valid data was passed.
 			Parameters
 			----------
@@ -140,12 +154,12 @@ class RegionDatabase:
 		return result
 
 	@db_session
-	def select(self, entity_type, expression):
+	def select(self, entity_type:str, expression):
 		entity_class = self._getEntityClass(entity_type)
 		result = entity_class.select(expression)
 		return result
 	@db_session
-	def get(self, entity_type, expression = None, **kwargs):
+	def get(self, entity_type:str, expression = None, **kwargs):
 		entity_class = self._getEntityClass(entity_type)
 		try:
 			if expression is not None:
@@ -167,7 +181,7 @@ class RegionDatabase:
 			raise exception
 		return result
 
-	def _getEntityKey(self, entity_type):
+	def _getEntityKey(self, entity_type:str)->str:
 		if entity_type in {'report', 'agency'}:
 			entity_key = 'name'
 		elif entity_type in {'unit', 'scale', 'units'}:
@@ -186,7 +200,7 @@ class RegionDatabase:
 	#    Private Methods     #
 	##########################
 	@db_session
-	def _searchByString(self, entity_type, string):
+	def _searchByString(self, entity_type:str, string:str)->str:
 		"""
 			Searches for an entity based on a single key string.
 			Parameters
@@ -209,7 +223,7 @@ class RegionDatabase:
 		return result
 	
 	@staticmethod
-	def _validateEntityArguments(entity_type, arg, **kwargs):
+	def _validateEntityArguments(entity_type:str, arg:Union[str,Dict], **kwargs):
 		""" Validates parameters used to insert or retrieve entities from the database.
 			Parameters
 			----------
@@ -314,7 +328,7 @@ class RegionDatabase:
 		return result
 
 	@db_session
-	def addNamespace(self, key):
+	def addNamespace(self, key:str)->EntityType:
 		""" Adds a namespace to the database.
 			TODO: Change to support the addition of a namespace from a dictionary.
 			Returns
@@ -354,7 +368,7 @@ class RegionDatabase:
 
 		return namespace_entity
 	
-	def summary(self, section = 'all'):
+	def summary(self, section:str = 'all')->Texttable:
 		"""
 			Parameters
 			----------
@@ -388,7 +402,7 @@ class RegionDatabase:
 		print(display_table.draw())
 		return display_table
 	@db_session
-	def exists(self, entity_type, key):
+	def exists(self, entity_type:str, key:str):
 		""" Wrapper around self.select(entity_type, expression).exists() """
 		entity_class = self._getEntityClass(entity_type)
 		entity_key = self._getEntityKey(entity_type)
@@ -399,7 +413,7 @@ class RegionDatabase:
 		return response
 
 	@db_session
-	def contains(self, string):
+	def contains(self, string:str):
 		""" Wrapper over self.exists() to test for regions, either by name or code. """
 
 		expression = lambda s: s.name == string or string in s.identifiers.string 
@@ -407,7 +421,7 @@ class RegionDatabase:
 		return result
 
 	@db_session
-	def getRegion(self, key, namespace = None):
+	def getRegion(self, key:str, namespace:EntityType = None):
 		"""Requests a region based on its name or namespace.
 			Parameters
 			----------

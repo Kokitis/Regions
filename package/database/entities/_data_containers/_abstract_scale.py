@@ -1,4 +1,5 @@
 from package.github import numbertools
+from typing import List, Iterable
 
 
 # noinspection PyTypeChecker
@@ -49,7 +50,7 @@ class CustomDataScale:
 	def __rmul__(self, other):
 		return self.__mul__(other)
 
-	def convert(self, array, human_readable = False):
+	def convert(self, array:Iterable, human_readable:bool = False):
 		""" Returns the scaled version of the provided array.
 			Ex. Scale('Hundreds')([1,2,3]) -> [100, 200, 300]
 			Ex. Scale('Millions')(314) -> 314,000,000

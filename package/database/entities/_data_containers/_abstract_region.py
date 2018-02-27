@@ -1,3 +1,4 @@
+from typing import List, Dict, Any
 class DataRegion:
 	""" Abstract class that implements the required properties that
 		all other Region entities must have. It also implements convienience
@@ -22,7 +23,7 @@ class DataRegion:
 	def __getitem__(self, item):
 		return self.data.get(item)
 
-	def _showIdentifiers(self, indent = 0):
+	def _showIdentifiers(self, indent:int = 0)->None:
 		indent = "\t" * indent if indent > 0 else ""
 		print("{}Available Identifiers [{}]".format(indent, len(self.identifiers)))
 
@@ -33,26 +34,26 @@ class DataRegion:
 				identifier.namespace.name)
 			)
 
-	def _showSeries(self, indent = 0):
+	def _showSeries(self, indent:int = 0)->None:
 		indent = "\t" * indent if indent > 0 else ""
 		print("{}Available Series [{}]".format(indent, len(self.series)))
 		for i in self.series:
 			print("{0}{0}{1}s".format(indent, i))
 
-	def _showSubRegions(self, indent = 0):
+	def _showSubRegions(self, indent:int = 0)->None:
 		indent = "\t" * indent if indent > 0 else ""
 		print("{}Subregions [{}]".format(indent, len(self.subRegions)))
 		for s in self.subRegions:
 			print("{0}{0}{1}".format(indent, s))
 
 
-	def toTable(self):
+	def toTable(self)->List[Dict[str,Any]]:
 		return [i.toTable() for i in self.series]
 
 	# Properties
 
 	@property
-	def identifiers(self):
+	def identifiers(self)->List[str]:
 		return self.data['identifiers']
 
 	@property

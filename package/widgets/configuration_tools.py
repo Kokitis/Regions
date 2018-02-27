@@ -1,13 +1,14 @@
 import os
 import json
 import yaml
-def getFilename(basename):
+from typing import Dict
+def getFilename(basename:str)->str:
 	path = os.path.dirname(__file__)
 	filename = os.path.join(path, 'configuration_files', basename)
 	return filename
 
 
-def saveConfiguration(config, filename):
+def saveConfiguration(config:Dict, filename:str)->None:
 	"""
 
 	Parameters
@@ -33,7 +34,7 @@ def saveConfiguration(config, filename):
 		file2.write(yaml.dump(config, default_flow_style = False, indent = 4))
 
 
-def loadConfiguration(basename):
+def loadConfiguration(basename:str)->Dict:
 	"""
 
 	Parameters

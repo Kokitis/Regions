@@ -12,14 +12,15 @@ import pandas
 from .configuration_tools import *
 from pprint import pprint
 from functools import partial
+from typing import Dict, Any, List, Union
+
+ConfigurationValueTypes = Union[str,Dict[str,str], List[str], bool]
+ConfigurationTypes = Dict[str,ConfigurationValueTypes]
+
 pprint = partial(pprint, width = 180)
 
 
-
-
-
-
-def getReport(report_key, filename):
+def getReport(report_key: str, filename: str) ->ConfigurationTypes:
 	if report_key in {'WEO' or 'World Economic Outlook'}:
 		report_configuration = getWorldEconomicOutlookConfiguration()
 	elif report_key in {'WDI', 'World Economic Outlook'}:
@@ -32,25 +33,25 @@ def getReport(report_key, filename):
 	return parsed_report
 
 
-def getWorldEconomicOutlookConfiguration():
+def getWorldEconomicOutlookConfiguration() ->ConfigurationTypes:
 	configuration_filename = getFilename('weo_configuration')
 	configuration = loadConfiguration(configuration_filename)
 
 	if configuration is None:
-		report = {
+		report: Dict[str, str] = {
 			'reportName': 'World Economic Outlook, April 2017',
 			'reportCode': '2017B',
 			'reportDate': "April 2017",
 			'reportUrl':  "http://www.imf.org/en/Publications/WEO/Issues/2017/04/04/world-economic-outlook-april-2017"
 		}
-		agency = {
+		agency: Dict[str, str] = {
 			'agencyCode':    "IMF",
 			'agencyName':    "International Monetary Fund",
 			'agencyUrl':     "http://www.imf.org/external/index.htm|http://www.imf.org/en/data",
 			'agencyAddress': "700 19th Street, N.W., Washington, D.C. 20431|1900 Pennsylvania Ave NW, Washington, DC, 20431"
 		}
 
-		blacklist = [
+		blacklist: List[str] = [
 			'NGDP_RPCH', 'NGDP_R', 'NGDP_D', 'PPPSH', 'NID_NGDP',
 			'NGSD_NGDP', 'PCPI', 'PCPIPCH', 'PCPIE', 'PCPIEPCH',
 			'GGSB', 'GGSB_NPGDP', 'GGXONLB', 'GGXONLB_NGDP', 'BCA',
@@ -79,7 +80,7 @@ def getWorldDevelopmentIndicatorsConfiguration(filename):
 		filename = os.path.expanduser(
 			'~\\Google Drive\\Region Data\\Global\\World Development Indicators\WDIEXCEL.xlsx')
 	if configuration is None:
-		whitelist = [
+		whitelist: List[str] = [
 			'PA.NUS.PPP.05', 'PA.NUS.PRVT.PP.05', 'NY.ADJ.NNTY.KD.ZG', 'NY.ADJ.NNTY.KD', 'NY.ADJ.NNTY.CD',
 			'NY.ADJ.NNTY.PC.KD.ZG', 'NY.ADJ.NNTY.PC.KD', 'NY.ADJ.NNTY.PC.CD', 'NY.ADJ.DCO2.GN.ZS', 'NY.ADJ.DCO2.CD',
 			'AG.LND.AGRI.ZS', 'AG.LND.AGRI.K2', 'EG.USE.COMM.CL.ZS', 'AG.LND.ARBL.ZS', 'AG.LND.ARBL.HA.PC',
@@ -195,14 +196,14 @@ def getWorldDevelopmentIndicatorsConfiguration(filename):
 
 			series_notes_map["{}|{}".format(region_code, subject_code)] = string
 
-		report = {
+		report: Dict[str, str] = {
 			'name':        "World Development Indicators",
 			'code':        "WDI",
 			'publishDate': "2017-09-15",
 			'url':         "https://data.worldbank.org/data-catalog/world-development-indicators",
 		}
 
-		agency = {
+		agency: Dict[str, str] = {
 			'code':    'WB',
 			'name':    'World Bank',
 			'url':     "http://data.worldbank.org",
@@ -228,14 +229,13 @@ def getWorldDevelopmentIndicatorsConfiguration(filename):
 	return configuration
 
 
-def addWorldPopulationProspects(filename):
+def addWorldPopulationProspects(filename:str)->ConfigurationTypes:
 	# For reference
 	configuration_filename = getFilename('wpp_configuration')
 	configuration = loadConfiguration(configuration_filename)
 
-
 	if configuration is None:
-		subject_keymap = {
+		subject_keymap: Dict[str, str] = {
 			'ESTIMATES':           'POP.EST',
 			'MEDIUM VARIANT':      'POP.PROJ.MID',
 			'HIGH VARIANT':        'POP.PROJ.MAX',
@@ -277,7 +277,7 @@ def addWorldPopulationProspects(filename):
 		print("Combining table...")
 		full_table = pandas.concat(table_dict.values())  # instead of adding another import statement pandas directly.
 
-		series_description_map = {
+		series_description_map: Dict[str, str] = {
 			'POP.PROJ.MID':
 								   """Medium fertility variant, 2015 - 2100|"""
 								   """Total fertility in high-fertility countries is generally assumed to decline at an average pace of nearly one child per decade starting in 2005 or later. """
@@ -317,11 +317,11 @@ def addWorldPopulationProspects(filename):
 			'POP.PROJ.CONST.MORT': "Constant-mortality variant, 2015 - 2100"
 		}
 
-		#series_unit_map = defaultdict(lambda: 'Thousand')
-		#series_scale_map = defaultdict(lambda: 'Persons')
+		# series_unit_map = defaultdict(lambda: 'Thousand')
+		# series_scale_map = defaultdict(lambda: 'Persons')
 		series_unit_map = {k: 'Thousand' for k in series_description_map.keys()}
 		series_scale_map = {k: 'Persons' for k in series_description_map.keys()}
-		report = {
+		report: Dict[str, str] = {
 			'name':        "World Population Prospects, The 2017 Revision",
 			'code':        "WPP2017",
 			'agency':      'United Nations',
@@ -329,7 +329,7 @@ def addWorldPopulationProspects(filename):
 			'url':         "https://esa.un.org/unpd/wpp/Download/Standard/Population/"
 		}
 
-		agency = {
+		agency: Dict[str, str] = {
 			'code':    'UN',
 			'name':    'United Nations',
 			'url':     'http://www.un.org/en/index.html',
