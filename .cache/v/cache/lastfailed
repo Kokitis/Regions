@@ -1,0 +1,4 @@
+{
+  "tests/test_regions.py::TestRegion::test_get_region_entity": true,
+  "tests/test_regions.py::test_get_region_entity": true
+}

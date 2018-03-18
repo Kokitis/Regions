@@ -1,0 +1,21 @@
+agency:
+    agencyAddress: University of Groningen PO Box 72 9700 AB Groningen
+    agencyCode: ''
+    agencyName: University of Groningen
+    agencyUrl: https://www.rug.nl
+jsonCompatible: false
+namespace: ISO
+report:
+    reportCode: MADDISONPOP
+    reportDate: '2008-09-08'
+    reportName: 'Historical Statistics of the World Economy:  1-2008 AD'
+    reportUrl: http://www.ggdc.net/maddison/oriindex.htm
+seriesTagMap:
+    POP:
+    - POP
+tableConfig:
+    sheetname: Population
+    skiprows: 2
+yearRange: !!python/tuple
+- 1820
+- null

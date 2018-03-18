@@ -1,1 +1,2 @@
-from .package import *
+from .pyregions import *
+
