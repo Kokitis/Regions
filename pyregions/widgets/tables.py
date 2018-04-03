@@ -1,4 +1,4 @@
-from pyregions.widgets.validation import entityKeywordMap
+from pyregions.widgets.validation.keyword_map import parseKeywords
 
 
 def isNumber(value):
@@ -58,7 +58,7 @@ def getRequiredColumns(table_columns, **kwargs):
 			* 'seriesDescriptionColumn'
 
 	"""
-	region_code_column = entityKeywordMap(
+	region_code_column = parseKeywords(
 		table_columns,
 		[
 			'regionCode', 'countryCode', 'isoCode', 'fipsCode', 'stateCode', kwargs.get('regionCodeColumn')
@@ -66,7 +66,7 @@ def getRequiredColumns(table_columns, **kwargs):
 		return_type = 'column'
 	)
 
-	region_name_column = entityKeywordMap(
+	region_name_column = parseKeywords(
 		table_columns,
 		[
 			'regionName', 'countryName', 'state', 'countyName', 'cityName', kwargs.get('regionNameColumn')
@@ -75,7 +75,7 @@ def getRequiredColumns(table_columns, **kwargs):
 
 	)
 
-	series_code_column = entityKeywordMap(
+	series_code_column = parseKeywords(
 		table_columns,
 		[
 			'seriesCode', 'subjectCode', 'variable', 'subjectCodeColumn', 'subjectCodeColumn', 'seriesCodeColumn',
@@ -84,7 +84,7 @@ def getRequiredColumns(table_columns, **kwargs):
 		return_type = 'column'
 	)
 
-	series_name_column = entityKeywordMap(
+	series_name_column = parseKeywords(
 		table_columns,
 		[
 			'seriesName', 'subjectName', 'subjectNameColumn', 'seriesNameColumn', kwargs.get('seriesNameColumn')
@@ -92,7 +92,7 @@ def getRequiredColumns(table_columns, **kwargs):
 		return_type = 'column'
 	)
 
-	series_note_column = entityKeywordMap(
+	series_note_column = parseKeywords(
 		table_columns,
 		[
 			'notes', 'subjectNotes', 'seriesNotes', kwargs.get('seriesNoteColumn')
@@ -100,7 +100,7 @@ def getRequiredColumns(table_columns, **kwargs):
 		return_type = 'column'
 	)
 
-	series_scale_column = entityKeywordMap(
+	series_scale_column = parseKeywords(
 		table_columns,
 		[
 			'scale', 'multiplier', 'seriesScale', kwargs.get('scaleColumn')
@@ -108,7 +108,7 @@ def getRequiredColumns(table_columns, **kwargs):
 		return_type = 'column'
 	)
 
-	series_unit_name_column = entityKeywordMap(
+	series_unit_name_column = parseKeywords(
 		table_columns,
 		[
 			'units', 'unit', 'Unit', 'Units', 'seriesUnit',
@@ -117,7 +117,7 @@ def getRequiredColumns(table_columns, **kwargs):
 		return_type = 'column'
 	)
 
-	series_unit_code_column = entityKeywordMap(
+	series_unit_code_column = parseKeywords(
 		table_columns,
 		[
 			'unitCode', 'seriesUnitCode', kwargs.get('unitCodeColumn')
@@ -125,7 +125,7 @@ def getRequiredColumns(table_columns, **kwargs):
 		return_type = 'column'
 	)
 
-	series_description_column = entityKeywordMap(
+	series_description_column = parseKeywords(
 		table_columns,
 		[
 			'seriesDescription', 'subjectDescription', 'description', kwargs.get('seriesDescriptionColumn')
@@ -134,7 +134,7 @@ def getRequiredColumns(table_columns, **kwargs):
 
 	)
 
-	series_tag_column = entityKeywordMap(
+	series_tag_column = parseKeywords(
 		table_columns,
 		[
 			'seriesTags', 'subjectTags', 'tags'

@@ -64,7 +64,10 @@ class TableApi:
 
 	def __init__(self, filename: Any, **kwargs):
 		kwargs['startDay'] = kwargs.get('startDay', '01-01')
-
+		kwargs['regionCodeColumn'] = kwargs.get('regionCodeColumn', 'regionCode')
+		kwargs['regionNameColumn'] = kwargs.get('regionNameColumn', 'regionName')
+		kwargs['seriesNameColumn'] = kwargs.get('seriesNameColumn', 'seriesName')
+		kwargs['seriesCodeColumn'] = kwargs.get('seriesCodeColumn', 'seriesCode')
 		kwargs['jsonCompatible'] = kwargs.get('jsonCompatible', False) or 'saveTo' in kwargs
 		file_kwargs = kwargs.get('tableConfig', dict())
 		namespace_key: str = kwargs.get('namespace')
@@ -275,7 +278,7 @@ class TableApi:
 				* 'yearRange': tuple<>
 				* 'regionCodeMap': dict<str,str>
 					Overrides regionCodeColumn
-				* descriptionMap: dict<tuple,dict>
+				* descriptionMap: dict<tuple, dict>
 				* blacklist: list<>
 					A list of series keys to skip when importing a table.
 				* whitelist: list<>
@@ -286,6 +289,7 @@ class TableApi:
 		blacklist: List[str] = kwargs.get('blacklist', [])
 		whitelist: List[str] = kwargs.get('whitelist', [])
 		year_range = kwargs.get('yearRange', (None, None))
+
 		region_code_column = kwargs['regionCodeColumn']
 		region_code_map = kwargs.get('regionCodeMap') # overridds region_code_column
 

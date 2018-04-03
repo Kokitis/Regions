@@ -8,7 +8,7 @@ import datetime
 series_code = 'POP'
 region_code = 'USA-NY'
 DATABASE_FILENAME = os.path.join(os.path.dirname(__file__), 'test_data', 'test_database.sqlite')
-TEST_DATABASE = pyregions.RegionDatabase(DATABASE_FILENAME, True, replace = False)
+TEST_DATABASE = pyregions.RegionDatabase(DATABASE_FILENAME, True)
 TEST_DATABASE.addNamespace('ISO')
 TEST_DATABASE.addNamespace('USPS')
 TEST_DATABASE.addFromApi(importTestData())

@@ -26,7 +26,7 @@ class DataSeries:
 	"""
 	entity_type: str = 'series'
 
-	def __init__(self, data:Dict, israw:bool = True):
+	def __init__(self, data: Dict, israw: bool = True):
 		self._verifyData(data)
 
 		multiplier: float = data['seriesScale']['scaleMultiplier']
@@ -158,9 +158,7 @@ class DataSeries:
 
 		return value
 
-
-
-	def getValueByIndex(self, date_value:Union[int, float, timetools.Timestamp]):
+	def getValueByIndex(self, date_value: Union[int, float, timetools.Timestamp]):
 		""" Retrieves a single value for the timestamp indicated by 'date_value'"""
 		if date_value in self.series.index:
 			index = date_value

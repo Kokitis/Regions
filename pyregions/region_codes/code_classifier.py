@@ -1,9 +1,23 @@
 import pathlib
 import pandas
 from fuzzywuzzy import process
+import dataclasses
+
 file_path = pathlib.Path(__file__)
 country_codes_filename = pathlib.Path(file_path.parent, 'data', 'country-codes.xlsx')
 from pprint import pprint
+from typing import *
+
+
+@dataclasses.dataclass
+class Namespace:
+	pass
+
+
+
+def loadRegionCodesISO():
+	pass
+
 
 class RegionCodeClassifier:
 	# http://www.unece.org/cefact/locode/welcome.html
@@ -36,6 +50,7 @@ class RegionCodeClassifier:
 			}
 			regions.append(region)
 		self.regions = {i['name'].lower(): i for i in regions}
+
 	def search(self, string, tolerance = 90):
 		index, score = process.extractOne(string.lower(), self.regions.keys())
 		if score >= tolerance:
@@ -43,11 +58,14 @@ class RegionCodeClassifier:
 		else:
 			best_match = None
 		return best_match
+	def definedRegions(self):
+		pass
 
 
 if __name__ == "__main__":
 	classifier = RegionCodeClassifier()
-	fname = pathlib.Path(pathlib.Path().home())/ 'Google Drive' / 'Region Data' /'Global' /'Historical Datasets' /'horizontal-file_02-2010.xls'
+	fname = pathlib.Path(
+		pathlib.Path().home()) / 'Google Drive' / 'Region Data' / 'Global' / 'Historical Datasets' / 'horizontal-file_02-2010.xls'
 	table = pandas.read_excel(fname, sheetname = 'Population')
 	for index, row in table.iterrows():
 		country_name = str(row[0])
@@ -57,5 +75,4 @@ if __name__ == "__main__":
 		else:
 			print(country_name)
 
-	#pprint(classifier.search('United States of America'))
-
+# pprint(classifier.search('United States of America'))

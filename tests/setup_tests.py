@@ -123,10 +123,11 @@ def importTestData():
 		'agency':    agency,
 		'report':    report,
 		'namespace': 'USPS',
-		'regions':   regions
+		#'regions':   regions
 	}
-
-	pyregions.utilities.ValidateApiResponse(api_response)
+	pprint(api_response)
+	api_response['regions'] = regions
+	pyregions.widgets.validation.ValidateApiResponse(api_response)
 
 	return api_response
 test_database_filename = os.path.join(os.path.dirname(__file__), 'test_data', 'test_database.sqlite')
@@ -136,7 +137,7 @@ if __name__ == "__main__":
 	#saveConfiguration(response, os.path.join(os.path.dirname(__file__), 'test_response.yaml'))
 	#pprint(response, width = 180)
 	test_database_filename = os.path.join(os.path.dirname(__file__), 'test_data', 'test_database.sqlite')
-	test_database = pyregions.RegionDatabase(test_database_filename, True, replace = True)
+	test_database = pyregions.RegionDatabase(test_database_filename, True)
 	test_database.addFromApi(response)
 	#test_database.summary()
 

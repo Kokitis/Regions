@@ -1,77 +1,30 @@
-from pony.orm import Optional, PrimaryKey, Required, Set, db_session
-from ._custom_sql_region import CustomSqlRegion
-from .._data_containers import DataRegion, DataSeries
-from pyregions.github import timetools
+from pony.orm import Optional, PrimaryKey, Required, Set, db_session, Database
+from pony.orm.core import Entity
+
+from typing import Dict
+
+from .sql_base_classes import *
 
 
 @db_session
-def importDatabaseEntities(db):
+def importDatabaseEntities(db: Database) -> Dict[str, Entity]:
 	""" Defines the structure of the database.
 		Parameters
 		----------
-		db: pony.orm.Database 
+		db: pony.orm.Database
 			The database object to insert the entities into.
 	"""
 
-	class Region(db.Entity, CustomSqlRegion):
-		# code 		= PrimaryKey(str)
-		type = Required(str)
-		name = Required(str)  # PrimaryKey(str)
-		code = PrimaryKey(str)
-		identifiers = Set('Identifier')
-		parent = Optional('Region', reverse = 'subregions')
-		subregions = Set('Region', reverse = 'parent')
-		series = Set('Series')
-		tags = Set('Tag')
+	class Region(db.Entity, SqlRegion):
+		region_type = Required(str)
+		region_name = Required(str)  # PrimaryKey(str)
+		region_code = PrimaryKey(str)
+		region_identifiers = Set('Identifier')
+		region_parent = Optional('Region', reverse = 'subregions')
+		region_children = Set('Region', reverse = 'parent')
+		region_series = Set('Series')
+		region_tags = Set('Tag')
 		entity_type = 'region'
-
-		@property
-		def key(self):
-			region_key = self.name
-			return region_key
-
-		@db_session
-		def toDict(self, compact = False):
-
-			parent_region = self.parent
-			if compact:
-				if parent_region:
-					region_parent = parent_region.toDict()
-				else:
-					region_parent = None
-				region_identifiers = [i.string for i in self.identifiers]
-				subregions = list()
-				region_series = list()
-
-			else:
-				region_series = [i.key for i in self.series]
-				if parent_region:
-					region_parent = parent_region.key
-				else:
-					region_parent = None
-				region_identifiers = [i.key for i in self.identifiers]
-				subregions = [i.key for i in self.subregions]
-
-
-			data = {
-				'entityType':        'region',
-				'entityKey':         self.key,
-				'regionType':        self.type,
-				'regionCode':        self.code,
-				'regionName':        self.name,
-
-				# Relations
-				'regionIdentifiers': region_identifiers,
-				'regionParent':      region_parent,
-				'regionSubregions':  subregions,
-				'regionSeries':      region_series,
-				'regionTags':        list()
-			}
-
-			return data
-		def toSeries(self):
-			region_data = self.toDict()
-			return DataRegion(region_data)
 
 	class Identifier(db.Entity):
 		string = Required(str)
@@ -104,169 +57,47 @@ def importDatabaseEntities(db):
 			}
 			return data
 
-
-	class Report(db.Entity):
-		name = PrimaryKey(str)
-		code = Optional(str)
-		url = Required(str)
-		date = Required(str)
-		data = Set('Series')
-		agency = Required('Agency')
-		tags = Set('Tag')
+	class Report(db.Entity, SqlReport):
+		report_name = PrimaryKey(str)
+		report_code = Optional(str)
+		report_url = Required(str)
+		report_date = Required(str)
+		report_data = Set('Series')
+		report_agency = Required('Agency')
+		report_tags = Set('Tag')
 		entity_type = 'report'
 
-		@property
-		def key(self):
-			report_key = self.name
-			return report_key
+	class Series(db.Entity, SqlSeries):
+		series_region = Required(Region)
+		series_report = Required(Report)
+		series_code = Required(str)
+		series_name = Required(str)
+		series_description = Optional(str)
+		series_notes = Optional(str)
 
-		@db_session
-		def toDict(self, compact=False):
-			if compact and False:
-				report_agency = self.agency.key
-
-			else:
-				report_agency = self.agency.toDict(True)
-			report_data = list()
-
-			data = {
-				'entityType':   'report',
-				'reportName':   self.name,
-				'reportCode':   self.code,
-				'reportUrl':    self.url,
-				'reportDate':   self.date,
-				'data':         report_data,
-				'reportAgency': report_agency,
-				'reportTags':   list()
-			}
-
-
-
-			return data
-
-	class Series(db.Entity):
-		region = Required(Region)
-		report = Required(Report)
-		code = Required(str)
-		name = Required(str)
-		description = Optional(str)
-		notes = Optional(str)
-
-		units = Optional('Unit')
-		scale = Optional('Scale')
+		series_units = Optional('Unit')
+		series_scale = Optional('Scale')
 
 		strvalues = Required(str)
-		tags = Set('Tag')
-		PrimaryKey(region, report, code)
+		series_tags = Set('Tag')
+		PrimaryKey(series_region, series_report, series_code)
 		entity_type = 'series'
 
-		def _splitStringValues(self):
-			string_values = self.strvalues
-
-			nvalues = list()
-			for element in string_values.split('||'):
-				year, value = element.split('|')
-				value = float(value)
-				if len(year) == 4:
-					year = year + '-01-01'
-				year = timetools.Timestamp(year)
-				nvalues.append((year, value))
-			return nvalues
-
-		@property
-		def values(self):
-			""" Returns list<Timestamp, float> """
-			if not hasattr(self, '_values_cache'):
-				self._values_cache = self._splitStringValues()
-
-			return self._values_cache
-
-		@property
-		def fvalues(self):
-			if not hasattr(self, '_fvalues_cache'):
-				self._fvalues_cache = [(i.toYear(), j) for i, j in self.values]
-			return self._fvalues_cache
-
-		@property
-		def key(self):
-			series_key = (self.region.key, self.report.key, self.code)
-			return series_key
-
-		@db_session
-		def toDict(self, compact = False, **kwargs):
-			to_json = kwargs.get('to_json', False)
-			if compact:
-				series_region = self.region.key
-				series_report = self.report.key
-				series_units = self.unit.key
-				series_scale = self.scale.key
-			else:
-				series_region = self.region.toDict(True)
-				series_report = self.report.toDict(True)
-				series_units = self.units.toDict()
-				series_scale = self.scale.toDict()
-
-			if to_json:
-				series_values = self.fvalues
-			else:
-				series_values = self.values
-
-
-			data = {
-				'entityType':        'series',
-				'entityKey':         self.key,
-				'seriesRegion':      series_region,
-				'seriesReport':      series_report,
-				'seriesCode':        self.code,
-				'seriesName':        self.name,
-				'seriesDescription': self.description,
-				'seriesNotes':       self.notes,
-				'seriesUnits':       series_units,
-				'seriesScale':       series_scale,
-				'seriesValues':      series_values,
-				'seriesTags':        list(),
-			}
-			return data
-		def toSeries(self):
-			series_data = self.toDict()
-			return DataSeries(series_data)
-
-	class Agency(db.Entity):
-		code = Required(str)
-		name = PrimaryKey(str)
-		url = Optional(str)
-		address = Optional(str)
-		reports = Set(Report)
+	class Agency(db.Entity, SqlAgency):
+		agency_code = Required(str)
+		agency_name = PrimaryKey(str)
+		agency_url = Optional(str)
+		agency_address = Optional(str)
+		agency_reports = Set(Report)
 		entity_type = 'agency'
 
-		@db_session
-		def toDict(self, compact = False):
-			if compact:
-				agency_reports = list()
-			else:
-				agency_reports = [i.key for i in self.reports]
-
-			data = {
-				'entityType':    'agency',
-				'agencyCode':    self.code,
-				'agencyName':    self.name,
-				'agencyWebsite': self.url,
-				'agencyAddress': self.address,
-				'agencyReports': agency_reports
-			}
-			return data
-
-		@property
-		def key(self):
-			return self.name
-
 	class Namespace(db.Entity):
-		name = PrimaryKey(str)
-		code = Optional(str)
-		regex = Optional(str)
-		subtypes = Optional(str)
-		url = Required(str)
-		identifiers = Set(Identifier)
+		namespace_name = PrimaryKey(str)
+		namespace_code = Optional(str)
+		namespace_regex = Optional(str)
+		namespace_subtypes = Optional(str)
+		namespace_url = Required(str)
+		namespace_identifiers = Set(Identifier)
 		entity_type = 'namespace'
 
 		@db_session
@@ -274,103 +105,75 @@ def importDatabaseEntities(db):
 			if compact:
 				namespace_identifiers = list()
 			else:
-				namespace_identifiers = [i.key for i in self.identifiers]
+				namespace_identifiers = [i.key for i in self.namespace_identifiers]
 
 			data = {
 				'entityType':           'namespace',
 				'entityKey':            self.key,
-				'namespaceName':        self.name,
-				'namespaceCode':        self.code,
-				'namespacePattern':     self.regex,
-				'namespaceWebsite':     self.url,
+				'namespaceName':        self.namespace_name,
+				'namespaceCode':        self.namespace_code,
+				'namespacePattern':     self.namespace_regex,
+				'namespaceWebsite':     self.namespace_url,
 				'namespaceIdentifiers': namespace_identifiers
 			}
 			return data
 
 		@property
 		def key(self):
-			return self.name
+			return self.namespace_name
 
 	class Tag(db.Entity):
-		string = PrimaryKey(str)
-		regions = Set(Region)
-		reports = Set(Report)
-		series = Set(Series)
+		tag_string = PrimaryKey(str)
+		tag_regions = Set(Region)
+		tag_reports = Set(Report)
+		tag_series = Set(Series)
 		entity_type = 'tag'
 
 		@property
 		def key(self):
-			return self.string
+			return self.tag_string
 
 		@property
 		def value(self):
-			return self.string.split('|')[1]
+			return self.tag_string.split('|')[1]
 
 		@db_session
 		def toDict(self):
 			data = {
 				'entityType': 'tag',
-				'entityKey':  self.key,
-				'tagString':  self.string
+				'entityKey':  self.tag_key,
+				'tagString':  self.tag_string
 			}
 
 			return data
 
-	class Unit(db.Entity):
+	class Unit(db.Entity, SqlUnit):
 		# id 	 = PrimaryKey(int, auto=True)
-		code = Optional(str)
-		string = PrimaryKey(str)
-		series = Set(Series)
+		unit_code = Optional(str)
+		unit_string = PrimaryKey(str)
+		unit_series = Set(Series)
 		entity_type = 'unit'
 
-		@property
-		def key(self):
-			return self.string
 
-		@db_session
-		def toDict(self):
 
-			data = {
-				'entityType':   'unit',
-				'entityKey':    self.key,
-				'entityString': self.string,
-				'entityCode':   self.code
-			}
-			return data
-
-	class Scale(db.Entity):
+	class Scale(db.Entity, SqlScale):
 		# id 			= PrimaryKey(int, auto=True)
-		series = Set(Series)
-		string = PrimaryKey(str)
-		multiplier = Required(float)
+		scale_series = Set(Series)
+		scale_string = PrimaryKey(str)
+		scale_multiplier = Required(float)
 		entity_type = 'scale'
 
-		@property
-		def key(self):
-			return self.string
 
-		@db_session
-		def toDict(self):
-			scale_series = list()
-			data = {
-				'entityType':      'scale',
-				'entityKey':       self.key,
-				'scaleSeries':     scale_series,
-				'scaleString':     self.string,
-				'scaleMultiplier': self.multiplier
-			}
-			return data
-
-	_entities = {
-		'agency':      Agency,
-		'identifier':  Identifier,
-		'namespace':   Namespace,
-		'region':      Region,
-		'report':      Report,
-		'series':      Series,
-		'tag':         Tag,
-		'unit':        Unit,
-		'scale':       Scale
+	_entities: Dict[str, Entity] = {
+		'agency':     Agency,
+		'identifier': Identifier,
+		'namespace':  Namespace,
+		'region':     Region,
+		'report':     Report,
+		'series':     Series,
+		'tag':        Tag,
+		'unit':       Unit,
+		'scale':      Scale
 	}
 
 	return _entities

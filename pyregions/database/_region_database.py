@@ -4,20 +4,21 @@
 
 from pprint import pprint
 from functools import partial
-from ..utilities import ValidateApiResponse, ValidateSqlResponse
+from ..widgets.validation import ValidateApiResponse, ValidateSqlResponse
 
 pprint = partial(pprint, width = 180)
 
 from pony.orm import Database, db_session
+#from pony.orm.core import EntityMeta
 import math
 from . import entities
+from .entities._sql_entities.sql_base_classes import *
 
-from pyregions.widgets import validation
 from ..widgets import *
 from ..github import timetools, numbertools
 from ..data import configuration
 
-from texttable import Texttable
+from typing import *
 
 Filename = str
 
@@ -33,67 +34,72 @@ XY_SEPARATOR: str = '|'
 POINT_SEPARATOR: str = '||'
 
 SQL_ARGUMENT_VALIDATION = ValidateSqlResponse()
-EntityType = 'RegionDatabase._main_database.Entity'
+#EntityType = EntityMeta
+EntityType = Union[SqlAgency, SqlRegion, SqlReport, SqlScale, SqlSeries, SqlUnit]
 
-_checkEntityType = lambda a, b: hasattr(b, 'entity_type') and b.entity_type == a
+_checkEntityType: Callable[[EntityType, str], bool] = lambda a, b: hasattr(b, 'entity_type') and b.entity_type == a
 
 
 class RegionDatabase:
-	def __init__(self, filename: Filename, create: bool = False, replace: bool = False):
+	def __init__(self, filename: Filename, create: bool = False):
 		"""
 			Parameters
 			----------
 				filename: string
 					Either a path to a region database or the name of a commonly used database.
 		"""
+		self.filename = self._getFilename(filename)
+		self._main_database: Database = Database()
+		_entities: Dict[str, EntityType] = entities.importDatabaseEntities(self._main_database)
 
-		self.create = create
+		self.create: bool = create
 
-		self.Agency = None
-		self.Identifier = None
-		self.Namespace = None
-		self.Region = None
-		self.Report = None
-		self.Series = None
-		self.Tag = None
-		self.Unit = None
-		self.Scale = None
+		self.Agency: EntityType = _entities['agency']
+		self.Identifier: EntityType = _entities['identifier']
+		self.Namespace: EntityType = _entities['namespace']
+		self.Region: EntityType = _entities['region']
+		self.Report: EntityType = _entities['report']
+		self.Series: EntityType = _entities['series']
+		self.Tag: EntityType = _entities['tag']
+		self.Unit: EntityType = _entities['unit']
+		self.Scale: EntityType = _entities['scale']
 
-		self._main_database = self._initializeDatabase(filename, create, replace)
+		self._main_database.bind("sqlite", self.filename, create_db = create)  # create_tables
+		self._main_database.generate_mapping(create_tables = create)
 
 	@db_session
-	def _getEntityClass(self, entity: str) -> EntityType:
+	def _getEntityClass(self, entity_type: str) -> EntityType:
 		""" Matches an entity string to the corresponding class.
 			Parameters
 			----------
 
-				entity: str,Entity
+				entity_type: str,Entity
 				{
 					'agency', 'identifier', 'namespace', 'observation', 'region', 'series', 'tag', 'unit', 'scale'
 				}
 
 		"""
 
-		if entity == 'agency':
+		if entity_type == 'agency':
 			_class = self.Agency
-		elif entity == 'identifier':
+		elif entity_type == 'identifier':
 			_class = self.Identifier
-		elif entity == 'namespace':
+		elif entity_type == 'namespace':
 			_class = self.Namespace
-		elif entity == 'region':
+		elif entity_type == 'region':
 			_class = self.Region
-		elif entity == 'report':
+		elif entity_type == 'report':
 			_class = self.Report
-		elif entity == 'series':
+		elif entity_type == 'series':
 			_class = self.Series
-		elif entity == 'tag':
+		elif entity_type == 'tag':
 			_class = self.Tag
-		elif entity == 'unit':
+		elif entity_type == 'unit':
 			_class = self.Unit
-		elif entity == 'scale':
+		elif entity_type == 'scale':
 			_class = self.Scale
 		else:
-			message = "'{}' is not a valid entity type.".format(entity)
+			message = "'{}' is not a valid entity type.".format(entity_type)
 			raise KeyError(message)
 
 		return _class
@@ -110,31 +116,6 @@ class RegionDatabase:
 				filename += '.sqlite'
 		return filename
 
-	def _initializeDatabase(self, _filename: str, create: bool, replace: bool) -> Database:
-
-		self.filename: Filename = self._getFilename(_filename)
-
-		if replace and os.path.exists(self.filename):
-			os.remove(self.filename)
-
-		_database: Database = Database()
-		_entities: Dict[str, EntityType] = entities.importDatabaseEntities(_database)
-
-		self.Agency = _entities['agency']
-		self.Identifier = _entities['identifier']
-		self.Namespace = _entities['namespace']
-		self.Region = _entities['region']
-		self.Report = _entities['report']
-		self.Series = _entities['series']
-		self.Tag = _entities['tag']
-		self.Unit = _entities['unit']
-		self.Scale = _entities['scale']
-
-		_database.bind("sqlite", self.filename, create_db = create)  # create_tables
-		_database.generate_mapping(create_tables = create)
-
-		return _database
-
 	@db_session
 	def _insertEntity(self, entity_type: str, **kwargs) -> EntityType:
 		""" Inserts an entity into the database. Assumes valid data was passed.
@@ -145,14 +126,11 @@ class RegionDatabase:
 				**kwargs
 		"""
 
-		if not self.create:
-			message = "The database must be initialized with the 'create' keyword set to True."
-			print(message)
-			return None
 		SQL_ARGUMENT_VALIDATION.validateResponse(entity_type, kwargs)
 		entity_class = self._getEntityClass(entity_type)
 
-		result = entity_class(**kwargs)
+		#result = entity_class(**kwargs)
+		result = entity_class.fromDict(kwargs)
 
 		return result
 
@@ -162,8 +140,10 @@ class RegionDatabase:
 		result = entity_class.select(expression)
 		return result
 
-	@staticmethod
-	def _getEntityKey(entity_type: str) -> str:
+
+	def _getEntityKey(self, entity_type: str) -> str:
+		entity_class = self._getEntityClass(entity_type)
+		entity_key = entity_class.getPrimaryKey()
 		if entity_type in {'report', 'agency'}:
 			entity_key = 'name'
 		elif entity_type in {'unit', 'scale', 'units', 'identifier'}:
@@ -182,12 +162,9 @@ class RegionDatabase:
 
 		return entity_key
 
-
-
 	##########################
 	#    Public Methods      #
 	##########################
-
 
 	@db_session
 	def addNamespace(self, key: str) -> EntityType:
@@ -261,47 +238,9 @@ class RegionDatabase:
 
 		if isinstance(key, str):
 			key = [key]
-		config = {k:v for k, v in zip(entity_key, key)}
-		#pprint(config)
+		config = {k: v for k, v in zip(entity_key, key)}
+		# pprint(config)
 		return config
-
-	@db_session
-	def summary(self, section: str = 'all') -> Texttable:
-		"""
-			Parameters
-			----------
-			section: {'all', 'regions', 'subjects', 'reports', 'series'}
-		"""
-
-		# List available regions
-		if section in {'all', 'regions'}:
-			print("Available Regions")
-			for region in sorted(self.select('region', lambda s: s), key = lambda s: s.name):
-				print("\t", region.name)
-
-		display_table = Texttable()
-		display_table.set_cols_width([20, 20, 30, 60, 60])
-		display_table.add_row(['reportName', 'seriesCode', 'seriesName', 'seriesDescription', 'seriesNotes'])
-
-		# List available reports/subjects
-		if section in {'all', 'subjects', 'series', 'reports'}:
-			print("Available Reports")
-			for report in self.select('report', lambda s: s):
-				# print("\t", report.name)
-				display_table.add_row([report.name, "", "", "", ""])
-				seen = set()
-				report_series = self.select('series', lambda s: s.report == report)
-				report_series.order_by(lambda s: s.name)
-				for series in report_series:
-					if series.code in seen:
-						continue
-					else:
-						seen.add(series.code)
-					# print("\t\t{:<12}\t{}".format("'{}'".format(series.code), series.name))
-					display_table.add_row(
-						["", "'{}'".format(series.code), series.name, series.description, series.notes])
-		print(display_table.draw())
-		return display_table
 
 	def exists(self, entity_type: str, key: Optional[str] = None, **kwargs) -> bool:
 		""" Wrapper around self.select(entity_type, expression).exists() """
@@ -311,52 +250,38 @@ class RegionDatabase:
 		return response
 
 	@db_session
-	def getRegion(self, key: str, namespace: Optional[Union[str, EntityType]] = None) -> EntityType:
+	def getRegion(self, key: str) -> EntityType:
 		"""Requests a region based on its name or namespace.
 			Parameters
 			----------
-			key: str, Identifier
+			key: str
 				The code or name of a region.
-			namespace: str,Namespace; default None
-				The namespace to search through, if a code is provided.
-				The keys are required to be valid identifiers if the namespace is not given.
+
 			Returns
 			-------
 			region: Region; default None
 		"""
 		# Get region by string
+		region = self.Region.get(code = key)
+		if region is None:
+			region = self.Region.get(name = key)
 
-		if _checkEntityType('region', key):
-			region = key
-		elif _checkEntityType('identifier', key):
-			region = key.region
-		elif isinstance(key, str):
-			identifier = self.Identifier.get(string = key)
-			region = self.Region.get(code = key)
-			if region is None and _checkEntityType('identifier', identifier):
-				region = identifier.region
-		else:
+		if region is None:
 			message = "'{}' cannot be used to find a region.".format(key)
 			raise ValueError(message)
 		return region
 
 	@db_session
-	def getRegions(self, keys: List[str], namespace = None):
-		""" Searches for a number of regions. """
-
-		for key in keys:
-			yield self.getRegion(key, namespace)
-
-	@db_session
-	def getSeries(self, region, key, to_entity: bool = False) -> entities.DataSeries:
+	def getSeries(self, region: Union[EntityType, str], key: str, to_entity: bool = False) -> Union[
+		None, EntityType, entities.DataSeries]:
 		"""	Retrieves a specific series for a given region.
 			Parameters
 			----------
-				region: str, Identifier, Region
+				region: str, Region
 				key: str
 					The name or code of a series.
 				to_entity: bool; default False
-					Method will return a Series entity rather than a SeriesData entity
+					Method will return a Series entity rather than a SeriesData entity.
 		"""
 		series_region = self.getRegion(region)
 		series = self.Series.get(region = series_region, code = key)
@@ -371,13 +296,13 @@ class RegionDatabase:
 
 	# Methods for adding data to the database.
 
-	def getData(self, entity_type, key = None, **kwargs):
+	def getData(self, entity_type: str, key: Optional[str] = None, **kwargs) -> Dict:
 		entity = self.getEntity(entity_type, key, **kwargs)
 		entity_data = entity.toDict()
 		return entity_data
 
 	@db_session
-	def addEntity(self, entity_type: str, entity_data = None, **kwargs):
+	def addEntity(self, entity_type: str, entity_data: Union[None, Dict, EntityType] = None, **kwargs) -> EntityType:
 		"""
 			Checks if an entity already exists before attempting to insert it.
 		Parameters
@@ -390,6 +315,7 @@ class RegionDatabase:
 		-------
 
 		"""
+		SQL_ARGUMENT_VALIDATION.validateResponse(entity_type, entity_data)
 		if entity_data is None:
 			entity_data = kwargs
 		if hasattr(entity_data, 'entity_type'):
@@ -397,18 +323,18 @@ class RegionDatabase:
 			if is_correct_entity:
 				return entity_data
 			else:
-				message = "'{}' does not match the expected entity type of '{}'".format(entity_data.entity_type, entity_type)
+				message = "'{}' does not match the expected entity type of '{}'".format(entity_data.entity_type,
+																						entity_type)
 				raise ValueError(message)
-		# arguments = self._validateEntityArguments(entity_type, **kwargs)
-		arguments = validation.parseEntityArguments(entity_type, **entity_data)
-		entity_keyword = self._getEntityKey(entity_type)
+
+		arguments = entity_data
+
+
 		if self.exists(entity_type, **arguments):
 			entity = self.getEntity(entity_type, **arguments)
 			if entity is None:
 				print("addEntity", arguments)
 				raise ValueError
-
-			#entity = self.getEntity(entity_type, **arguments)
 
 		else:
 			entity = self._insertEntity(entity_type, **arguments)
@@ -416,7 +342,7 @@ class RegionDatabase:
 		return entity
 
 	@db_session
-	def getEntity(self, entity_type: str, key: Optional[str] = None, **kwargs):
+	def getEntity(self, entity_type: str, key: Optional[str] = None, **kwargs) -> EntityType:
 
 		entity_config = self._getEntityPrimaryKey(entity_type, key, **kwargs)
 		# print(entity_config)
@@ -428,7 +354,7 @@ class RegionDatabase:
 
 			region = kwargs['region']
 			series_code = kwargs['code']
-			retrieved_entity = self.getSeries(region, series_code)
+			retrieved_entity = self.getSeries(region, series_code, to_entity = True)
 		else:
 			entity_class = self._getEntityClass(entity_type)
 
@@ -440,7 +366,7 @@ class RegionDatabase:
 	#   Methods for adding/updating data   #
 	########################################
 
-	def _insertRegion(self, region_key, region_data, report_namespace):
+	def _insertRegion(self, region_key: str, region_data: Dict, report_namespace) -> EntityType:
 		region_config = {
 			'code':   region_key,
 			'type':   region_data['regionType'],
@@ -463,11 +389,11 @@ class RegionDatabase:
 		return region_entity
 
 	def _insertSeries(self, series_key: str, region_entity: EntityType, report_entity: EntityType,
-					  series_data: Dict) -> EntityType:
-		#processed_arguments = self._validateEntityArguments('series', series_data)
+					  series_data: Dict) -> Optional[EntityType]:
+		# processed_arguments = self._validateEntityArguments('series', series_data)
 		series_already_exists = self.Series.exists(code = series_key, region = region_entity, report = report_entity)
 		if series_already_exists:
-			return None
+			return self.getSeries(region_entity, series_key)
 		scale_data = series_data['seriesScale']
 		unit_data = series_data['seriesUnits']
 
@@ -503,13 +429,7 @@ class RegionDatabase:
 			'strvalues':   series_values
 		}
 
-		"""
-		processed_arguments['code'] = series_key
-		processed_arguments['region'] = region_entity
-		processed_arguments['report'] = report_entity
 
-		inserted_series = self.Series(**processed_arguments)
-		"""
 		inserted_series = self.Series(**series_config)
 		return inserted_series
 
@@ -547,7 +467,6 @@ class RegionDatabase:
 			print("Importing from Api Response...", flush = True)
 			print("\tsize of database before import: {:.2f} MB".format(db_size))
 
-
 		ValidateApiResponse(report)
 
 		report_namespace = self.addNamespace(report['namespace'])
@@ -577,9 +496,9 @@ class RegionDatabase:
 				region_key]
 
 			for series_data in region_data['regionSeries']:
-				self._insertSeries(series_data['seriesCode'],region_entity, report_entity, series_data)
+				self._insertSeries(series_data['seriesCode'], region_entity, report_entity, series_data)
 
-				#self._insertSeries(series_data['seriesCode'], region_entity, report_entity, series_config)
+			# self._insertSeries(series_data['seriesCode'], region_entity, report_entity, series_config)
 			self._main_database.commit()
 
 		# self.addEntity('series', **series_config)
@@ -599,12 +518,13 @@ class RegionDatabase:
 
 	@property
 	def filesize(self) -> float:
-		if os.path.exists(self.filename):
+		try:
 			db_size = os.path.getsize(self.filename) / 1024 ** 2
-		else:
+		except FileNotFoundError:
 			db_size = 0.0
 
 		return db_size
+
 	@db_session
 	def rollback(self):
 		self._main_database.rollback()
