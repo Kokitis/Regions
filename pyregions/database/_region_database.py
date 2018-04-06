@@ -126,10 +126,8 @@ class RegionDatabase:
 				**kwargs
 		"""
 
-		SQL_ARGUMENT_VALIDATION.validateResponse(entity_type, kwargs)
+		ValidateApiResponse(entity_type, **kwargs)
 		entity_class = self._getEntityClass(entity_type)
-
-		#result = entity_class(**kwargs)
 		result = entity_class.fromDict(kwargs)
 
 		return result
@@ -140,27 +138,6 @@ class RegionDatabase:
 		result = entity_class.select(expression)
 		return result
 
-
-	def _getEntityKey(self, entity_type: str) -> str:
-		entity_class = self._getEntityClass(entity_type)
-		entity_key = entity_class.getPrimaryKey()
-		if entity_type in {'report', 'agency'}:
-			entity_key = 'name'
-		elif entity_type in {'unit', 'scale', 'units', 'identifier'}:
-			entity_key = 'string'
-		elif entity_type == 'namespace':
-			entity_key = 'code'
-		elif entity_type == 'region':
-			entity_key = 'code'
-		elif entity_type == 'tag':
-			entity_key = 'string'
-		elif entity_type == 'series':
-			entity_key = ('code', 'region', 'report')
-		else:
-			message = "'{}' is not supported!".format(entity_type)
-			raise ValueError(message)
-
-		return entity_key
 
 	##########################
 	#    Public Methods      #
@@ -262,9 +239,10 @@ class RegionDatabase:
 			region: Region; default None
 		"""
 		# Get region by string
-		region = self.Region.get(code = key)
+		region_class = self._getEntityClass('region')
+		region = region_class.get(code = key)
 		if region is None:
-			region = self.Region.get(name = key)
+			region = region_class.get(name = key)
 
 		if region is None:
 			message = "'{}' cannot be used to find a region.".format(key)
@@ -296,7 +274,7 @@ class RegionDatabase:
 
 	# Methods for adding data to the database.
 
-	def getData(self, entity_type: str, key: Optional[str] = None, **kwargs) -> Dict:
+	def getData(self, entity_type: str, key: Optional[str] = None, **kwargs) -> Dict[str,Any]:
 		entity = self.getEntity(entity_type, key, **kwargs)
 		entity_data = entity.toDict()
 		return entity_data

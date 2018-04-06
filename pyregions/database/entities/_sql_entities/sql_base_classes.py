@@ -53,6 +53,12 @@ class SqlRegion:
 	def getPrimaryKey(self) -> Dict[str, Any]:
 		raise NotImplementedError
 
+	def exists(self, *args, **kwargs):
+		raise NotImplementedError
+	@classmethod
+	def getEntity(cls, key: str):
+		return cls.get(region_code = key)
+
 	@property
 	def key(self):
 		region_key = self.region_code
@@ -157,6 +163,9 @@ class SqlReport:
 	def getPrimaryKey(self) -> Dict[str, Any]:
 		raise NotImplementedError
 
+	def exists(self, *args, **kwargs):
+		raise NotImplementedError
+
 	@property
 	def key(self):
 		report_key = self.report_name
@@ -240,6 +249,9 @@ class SqlSeries:
 		raise NotImplementedError
 
 	def getPrimaryKey(self) -> Dict[str, Any]:
+		raise NotImplementedError
+
+	def exists(self, *args, **kwargs):
 		raise NotImplementedError
 
 	@classmethod
@@ -384,6 +396,9 @@ class SqlAgency:
 	def getPrimaryKey(self) -> Dict[str, Any]:
 		raise NotImplementedError
 
+	def exists(self, *args, **kwargs):
+		raise NotImplementedError
+
 	@db_session
 	def toDict(self, compact = False) -> Dict[str, Any]:
 		if compact:
@@ -453,6 +468,9 @@ class SqlUnit:
 	def getPrimaryKey(self) -> Dict[str, Any]:
 		raise NotImplementedError
 
+	def exists(self, *args, **kwargs):
+		raise NotImplementedError
+
 	@property
 	def key(self):
 		return self.unit_string
@@ -497,6 +515,9 @@ class SqlScale:
 		raise NotImplementedError
 
 	def getPrimaryKey(self) -> Dict[str, Any]:
+		raise NotImplementedError
+
+	def exists(self, *args, **kwargs):
 		raise NotImplementedError
 
 	@property
